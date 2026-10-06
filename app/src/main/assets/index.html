@@ -1,0 +1,530 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>html{-webkit-text-size-adjust:100%}body{margin:0;font-size:14px}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Bento Week</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@600;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: a bento box — a "today" lid on top, then tabbed compartments for week, prep, recipes, shopping */
+:root{
+  --bg:#f3f4f1; --paper:#ffffff; --ink:#1d2330; --muted:#5d6472; --line:#dcdfe3;
+  --ai:#24407a; --ai-soft:#e3e9f5; --ume:#b23a48; --ume-soft:#f7e4e6; --nori:#3c5a3a; --nori-soft:#e4ede2;
+  --display:"Shippori Mincho","Hiragino Mincho ProN",Georgia,serif;
+  --body:"Zen Kaku Gothic New","Hiragino Sans",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#12151c; --paper:#1b2029; --ink:#e8eaee; --muted:#a2a8b4; --line:#2e3542;
+  --ai:#9db4ea; --ai-soft:#22304d; --ume:#ec8b96; --ume-soft:#3d2228; --nori:#9cc596; --nori-soft:#223324; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12151c; --paper:#1b2029; --ink:#e8eaee; --muted:#a2a8b4; --line:#2e3542;
+  --ai:#9db4ea; --ai-soft:#22304d; --ume:#ec8b96; --ume-soft:#3d2228; --nori:#9cc596; --nori-soft:#223324; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.6}
+.wrap{max-width:860px;margin:0 auto;padding-inline:16px;padding-block:24px 56px}
+header h1{font-family:var(--display);font-weight:800;font-size:clamp(28px,6vw,40px);line-height:1.15;margin:0;text-wrap:balance}
+header h1 span{color:var(--ume)}
+header p{color:var(--muted);margin:6px 0 0;max-width:60ch}
+.label{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+
+/* Today lid */
+.today{margin-top:20px;background:var(--paper);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.today-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;padding:14px 16px;border-bottom:1px solid var(--line)}
+.today-head h2{font-family:var(--display);font-size:22px;margin:0}
+.pill{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border-radius:99px}
+.pill.work{background:var(--ai-soft);color:var(--ai)}
+.pill.off{background:var(--nori-soft);color:var(--nori)}
+.pill.prep{background:var(--ume-soft);color:var(--ume)}
+.slots{display:grid;grid-template-columns:repeat(4,1fr)}
+.slot{padding:14px 16px;border-right:1px solid var(--line);min-width:0}
+.slot:last-child{border-right:0}
+.slot .time{font-family:var(--mono);font-size:12px;color:var(--ai);font-variant-numeric:tabular-nums}
+.slot .name{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:2px}
+.slot .food{margin-top:6px;font-weight:500}
+.note{padding:10px 16px;background:var(--ume-soft);color:var(--ink);font-size:14px}
+/* Day plan */
+.today .switch{padding:12px 16px 0;margin:0}
+.kind-blurb{padding:8px 16px 12px;margin:0;color:var(--muted);font-size:14px;border-bottom:1px solid var(--line)}
+.done-count{font-family:var(--mono);font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.row{display:grid;grid-template-columns:72px 1fr auto;gap:12px;align-items:start;padding:11px 16px;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+label.row{cursor:pointer}
+.row .t{font-family:var(--mono);font-size:13px;color:var(--ai);font-variant-numeric:tabular-nums;padding-top:2px}
+.row .b{min-width:0}
+.row .cat{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.row b{display:block;font-weight:700}
+.row .d{display:block;font-size:14px;color:var(--muted)}
+.row input{width:20px;height:20px;margin-top:4px;accent-color:var(--ai)}
+.row input:focus-visible{outline:2px solid var(--ume);outline-offset:2px}
+.row.is-now{background:var(--ai-soft)}
+.row:has(input:checked) b{text-decoration:line-through;color:var(--muted)}
+.row.peak{background:var(--ume-soft)}
+.row.peak .t,.row.peak .cat{color:var(--ume)}
+.row.c-care .cat{color:var(--ume)}
+.row.c-eat .cat{color:var(--nori)}
+.row.c-house .cat{color:var(--ai)}
+@media (max-width:480px){.row{grid-template-columns:62px 1fr auto;gap:10px}}
+@media (max-width:640px){.slots{grid-template-columns:1fr 1fr}.slot:nth-child(2){border-right:0}.slot:nth-child(-n+2){border-bottom:1px solid var(--line)}}
+
+/* Tabs */
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);margin-top:24px;padding-block:8px;display:flex;gap:6px;overflow-x:auto}
+nav button{font:inherit;font-weight:700;font-size:14px;border:1px solid var(--line);background:var(--paper);color:var(--ink);padding:8px 14px;border-radius:99px;cursor:pointer;white-space:nowrap}
+nav button[aria-selected="true"]{background:var(--ai);border-color:var(--ai);color:var(--paper)}
+nav button:focus-visible,.check input:focus-visible{outline:2px solid var(--ume);outline-offset:2px}
+section{margin-top:12px}
+section h3{font-family:var(--display);font-size:24px;margin:8px 0 4px;text-wrap:balance}
+section > p.lead{color:var(--muted);margin:0 0 14px;max-width:62ch}
+
+/* Week */
+.days{display:grid;gap:10px}
+.day{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.day.is-today{border-color:var(--ai);box-shadow:0 0 0 1px var(--ai)}
+.day-top{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.day-top b{font-family:var(--display);font-size:18px}
+.meals{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.meals div{min-width:0;font-size:14px}
+.meals small{display:block;font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.06em}
+@media (max-width:640px){.meals{grid-template-columns:1fr 1fr}}
+
+/* Prep timeline */
+.steps{list-style:none;margin:0;padding:0;display:grid;gap:0;background:var(--paper);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.steps li{display:grid;grid-template-columns:78px 1fr;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.steps li:last-child{border-bottom:0}
+.steps .t{font-family:var(--mono);color:var(--ume);font-variant-numeric:tabular-nums;font-size:14px;padding-top:1px}
+.steps b{display:block}
+.callout{margin-top:12px;padding:12px 14px;border-left:3px solid var(--nori);background:var(--nori-soft);border-radius:0 10px 10px 0;font-size:14px}
+
+/* Recipes */
+.recipes{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
+.recipe{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:14px}
+.recipe h4{margin:0;font-family:var(--display);font-size:18px}
+.recipe .jp{font-size:12px;color:var(--muted)}
+.recipe ul{margin:8px 0 0;padding-left:18px;font-size:14px}
+.recipe p{margin:8px 0 0;font-size:14px}
+.recipe .uses{margin-top:10px;font-family:var(--mono);font-size:11px;color:var(--ai);letter-spacing:.04em}
+
+/* Shopping */
+.stores{display:grid;gap:12px}
+.store{background:var(--paper);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.store-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;padding:12px 14px;border-bottom:1px solid var(--line)}
+.store-head h4{margin:0;font-family:var(--display);font-size:19px}
+.store-head .count{font-family:var(--mono);font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.check{display:flex;gap:10px;align-items:flex-start;padding:10px 14px;border-bottom:1px solid var(--line);cursor:pointer}
+.check:last-child{border-bottom:0}
+.check input{width:18px;height:18px;margin-top:3px;accent-color:var(--ai);flex:none}
+.check span{min-width:0}
+.check small{display:block;color:var(--muted);font-size:13px}
+.check input:checked + span{text-decoration:line-through;color:var(--muted)}
+.reset{font:inherit;font-size:13px;border:1px solid var(--line);background:transparent;color:var(--muted);padding:6px 12px;border-radius:99px;cursor:pointer;margin-top:12px}
+footer{margin-top:28px;font-size:12px;color:var(--muted)}
+footer a{color:var(--ai)}
+/* Rotation switcher */
+.switch{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 6px}
+.switch button{font:inherit;font-family:var(--display);font-weight:800;font-size:16px;width:40px;height:40px;border-radius:10px;border:1px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer;position:relative}
+.switch button[aria-pressed="true"]{background:var(--ume);border-color:var(--ume);color:var(--paper)}
+.switch button.current::after{content:"";position:absolute;bottom:4px;left:50%;width:5px;height:5px;margin-left:-2.5px;border-radius:50%;background:var(--ai)}
+.switch button[aria-pressed="true"].current::after{background:var(--paper)}
+.switch button:focus-visible{outline:2px solid var(--ai);outline-offset:2px}
+.wk-title{margin:0 0 14px;font-size:14px;color:var(--muted)}
+.wk-title b{color:var(--ink);font-weight:700}
+.wk-title .pill{margin-left:6px;vertical-align:1px}
+@media (prefers-reduced-motion:no-preference){nav button{transition:background .15s,color .15s}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div class="label">Day plan · Japanese home cooking</div>
+    <h1>Bento Week<span>.</span></h1>
+    <p>Your whole day on one page: shower, chores, work, games, meals and bed. Bedtime steps earlier every 3 days until it reaches 10 PM. A machine runs every other day, laundry one time and the dishwasher the next, and never during the 4–9 PM peak power hours.</p>
+  </header>
+
+  <div class="today" id="today"></div>
+
+  <nav role="tablist" aria-label="Plan sections">
+    <button role="tab" id="t-week" aria-controls="week" aria-selected="true">Week</button>
+    <button role="tab" id="t-prep" aria-controls="prep" aria-selected="false">Monday prep</button>
+    <button role="tab" id="t-recipes" aria-controls="recipes" aria-selected="false">Recipes</button>
+    <button role="tab" id="t-shop" aria-controls="shop" aria-selected="false">Shopping</button>
+  </nav>
+
+  <section id="week" role="tabpanel" aria-labelledby="t-week">
+    <h3>The week</h3>
+    <p class="lead">Cooking starts Monday, Oct 12 with Week A. Four weeks rotate (A, B, C, D), each with different proteins, sides, onigiri and weekend meals, then it starts over. The dot marks this week; tap a letter to see what's coming. Meal times follow your wake-up time in the day plan above.</p>
+    <div class="switch" id="week-switch" role="group" aria-label="Rotation week"></div>
+    <p class="wk-title" id="week-title"></p>
+    <div class="days" id="days"></div>
+  </section>
+
+  <section id="prep" role="tabpanel" aria-labelledby="t-prep" hidden>
+    <h3 id="prep-h">Monday prep</h3>
+    <p class="lead">About 75 minutes. No rice to cook: your microwave rice bowls are shelf-stable, so you only prep the protein, sides and onigiri. It starts half an hour after lunch and finishes before peak power hours begin at 4. Sunday works too if Monday gets busy.</p>
+    <div class="switch" id="prep-switch" role="group" aria-label="Rotation week"></div>
+    <p class="wk-title" id="prep-title"></p>
+    <ol class="steps" id="prep-steps"></ol>
+    <div class="callout"><b>Food safety:</b> cooked meat and salmon keep 3–4 days in the fridge, so Monday's cooking is good through Thursday. Onigiri firm up when cold; 20–30 seconds in the microwave fixes it. Sealed rice bowls stay in the pantry until you open them.</div>
+  </section>
+
+  <section id="recipes" role="tabpanel" aria-labelledby="t-recipes" hidden>
+    <h3>Core recipes</h3>
+    <p class="lead">Every recipe in the 4-week rotation, built on your microwave rice bowls. Each card says which week uses it.</p>
+    <div class="recipes" id="recipe-list"></div>
+  </section>
+
+  <section id="shop" role="tabpanel" aria-labelledby="t-shop" hidden>
+    <h3>Shopping list</h3>
+    <p class="lead">Start with what's already in your pantry. Then Costco for rice bowls, protein and frozen meals twice a month, Hardester's in Middletown for weekly produce, and Grocery Outlet for pantry items when they show up. Checkmarks stay on this device.</p>
+    <div class="stores" id="stores"></div>
+    <button class="reset" id="reset" type="button">Clear all checkmarks</button>
+  </section>
+
+  <footer>Store details from <a href="https://feedam.org/resource/512987">Hardester's Middletown</a>, <a href="https://www.lakeconews.com/news/business/72643-grocery-outlet-opens-newest-store-in-hidden-valley-lake-may-26">Grocery Outlet Hidden Valley Lake</a>, <a href="https://www.thedailymeal.com/2231825/best-japanese-style-foods-costco-2026/">The Daily Meal</a> and <a href="https://www.aol.com/japanese-groceries-buying-costco-one-140100833.html">Food &amp; Wine</a>. Store stock changes, so treat the list as a checklist.</footer>
+</div>
+
+<script>
+let TIMES = {work:["10:15 AM","2:30 PM","6:30 PM","10:00 PM"], off:["10:45 AM","2:00 PM","6:30 PM","10:00 PM"]};
+const NAMES = ["Breakfast","Lunch","Dinner","Late snack"];
+const TYPES = ["off","prep","work","work","work","off","off"]; // Sun..Sat
+const DAYNAMES = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+const FILL = "Fill your bento from the prep containers before you leave (about 5 min).";
+// Each week: days indexed Sun..Sat. Sunday dinner makes extra for the NEXT week's Monday lunch.
+const ROT = [
+ {k:"A",name:"Teriyaki chicken & salt salmon",onigiri:"tuna-mayo",
+  days:[
+   ["Rice bowl + egg + miso soup","Leftovers or tuna-mayo onigiri","Japanese curry rice (make extra for Monday)","—"],
+   ["Tamago kake gohan (hot rice + egg + soy)","Leftover fried rice from Sunday","Teriyaki chicken bowl","Edamame"],
+   ["2 tuna-mayo onigiri + marinated egg","Bento: salt salmon, cucumber salad + rice","Teriyaki chicken bowl + miso soup","Clementine"],
+   ["2 tuna-mayo onigiri + marinated egg","Bento: teriyaki chicken, spinach + rice","Gyoza + rice + miso soup","Rice crackers"],
+   ["2 tuna-mayo onigiri + marinated egg","Bento: salt salmon, cucumber salad + rice","Last teriyaki chicken + miso soup","Edamame"],
+   ["Kimchi fried rice bowl + fried egg","Tonkotsu ramen bowl + marinated egg","Shrimp tempura donburi","—"],
+   ["Rice bowl + egg + pickles","Upgraded pantry noodles","Gyoza + rice + miso soup","—"]],
+  prep:[
+   ["4:10","Marinate the chicken","2 lb thighs cut into strips, tossed in teriyaki sauce. Rest 15 minutes."],
+   ["4:15","Salt salmon in the oven","3 thawed portions, salted. 400°F for 12–15 minutes."],
+   ["4:25","Cook the chicken","Pan-fry until browned and glazed, about 10 minutes."],
+   ["4:40","Make the sides","Cucumber salad and spinach goma-ae."]]},
+ {k:"B",name:"Ginger pork & miso salmon",onigiri:"furikake",
+  days:[
+   ["Rice bowl + egg + miso soup","Sushi leftovers as a rice bowl","Pork & cabbage stir-fry (make extra for Monday)","—"],
+   ["Rice + egg + furikake","Leftover curry rice from Sunday","Ginger pork bowl","Edamame"],
+   ["2 furikake onigiri + marinated egg","Bento: miso salmon, cabbage pickles + rice","Ginger pork bowl + miso soup","Clementine"],
+   ["2 furikake onigiri + marinated egg","Bento: ginger pork, edamame + rice","Kimchi fried rice bowl + fried egg","Rice crackers"],
+   ["2 furikake onigiri + marinated egg","Bento: miso salmon, cabbage pickles + rice","Last ginger pork + miso soup","Edamame"],
+   ["Rice bowl + egg + miso soup","Upgraded pantry noodles","Gyoza + rice + cabbage pickles","—"],
+   ["Tamago kake gohan","Tonkotsu ramen bowl + marinated egg","Sushi night: hand rolls with your kit","—"]],
+  prep:[
+   ["4:10","Marinate the pork","1½ lb thin-sliced pork in ginger sauce. Rest 10 minutes."],
+   ["4:15","Miso salmon in the oven","3 thawed portions brushed with miso glaze. 400°F for 12–15 minutes; watch the last 2 so the glaze doesn't burn."],
+   ["4:25","Cook the ginger pork","Pan-fry with a sliced onion until the sauce clings, about 8 minutes."],
+   ["4:40","Make the sides","Quick cabbage pickles; thaw a bag of edamame."]]},
+ {k:"C",name:"Chicken soboro & teriyaki salmon",onigiri:"spicy tuna-mayo",
+  days:[
+   ["Rice bowl + egg + miso soup","Leftovers","Chicken curry rice (make extra for Monday)","—"],
+   ["Rice + egg + soy","Leftover pork stir-fry from Sunday","Soboro bowl (chicken + egg crumbles)","Edamame"],
+   ["2 spicy tuna onigiri + marinated egg","Bento: teriyaki salmon, carrot kinpira + rice","Soboro bowl + miso soup","Clementine"],
+   ["2 spicy tuna onigiri + marinated egg","Bento: chicken soboro, spinach + rice","Gyoza + rice + miso soup","Rice crackers"],
+   ["2 spicy tuna onigiri + marinated egg","Bento: teriyaki salmon, carrot kinpira + rice","Last soboro bowl + miso soup","Edamame"],
+   ["Kimchi fried rice bowl + fried egg","Tonkotsu ramen bowl + marinated egg","Panko shrimp donburi","—"],
+   ["Rice bowl + egg + pickles","Upgraded pantry noodles","Salt-grilled salmon + rice + miso soup","—"]],
+  prep:[
+   ["4:10","Cook the soboro","1½ lb ground chicken with soy, mirin, sugar and ginger. Stir until fine and crumbly, about 10 minutes."],
+   ["4:15","Teriyaki salmon in the oven","3 thawed portions brushed with teriyaki sauce. 400°F for 12–15 minutes."],
+   ["4:25","Egg crumbles","Scramble 4 eggs with a pinch of sugar, stirring with chopsticks into small curds."],
+   ["4:40","Make the sides","Carrot kinpira and spinach goma-ae."]]},
+ {k:"D",name:"Gyudon beef & yakitori chicken",onigiri:"salmon",
+  days:[
+   ["Rice bowl + egg + miso soup","Tuna-mayo onigiri","Shrimp & egg fried rice (make extra for Monday)","—"],
+   ["Rice + egg + soy","Leftover chicken curry from Sunday","Gyudon beef bowl","Edamame"],
+   ["2 salmon onigiri + marinated egg","Bento: yakitori chicken, cucumber salad + rice","Gyudon + miso soup","Clementine"],
+   ["2 salmon onigiri + marinated egg","Bento: gyudon beef, cabbage pickles + rice","Upgraded pantry noodles + egg","Rice crackers"],
+   ["2 salmon onigiri + marinated egg","Bento: yakitori chicken, cucumber salad + rice","Last gyudon + miso soup","Edamame"],
+   ["Kimchi fried rice bowl + fried egg","Tonkotsu ramen bowl + marinated egg","Gyoza + rice + miso soup","—"],
+   ["Tamago kake gohan","Leftovers","Shrimp tempura donburi","—"]],
+  prep:[
+   ["4:10","Simmer the gyudon","1½ lb shaved beef and a sliced onion in the gyudon sauce, about 10 minutes."],
+   ["4:15","Chicken + salmon in the oven","2 lb thighs in chunks, salted and brushed with a little teriyaki sauce, plus 1 salmon portion for the onigiri. 425°F for 18–20 minutes."],
+   ["4:35","Flake the salmon","Flake it with a fork and mix in a few drops of soy for the onigiri filling."],
+   ["4:40","Make the sides","Cucumber salad and quick cabbage pickles."]]}
+];
+const ANCHOR = new Date(2026,9,12); // Monday Oct 12, 2026 = Week A, the first Bento week
+function mondayOf(d){ const m = new Date(d.getFullYear(),d.getMonth(),d.getDate()); m.setDate(m.getDate()-((m.getDay()+6)%7)); return m; }
+const STARTED = mondayOf(new Date())>=ANCHOR;
+const CUR = STARTED ? (((Math.round((mondayOf(new Date())-ANCHOR)/(7*864e5)))%4)+4)%4 : -1;
+let sel = Math.max(CUR,0);
+const TYPE_LABEL = {work:"Work day",off:"Day off",prep:"Prep day"};
+const KIND = ["reset","prep","work","work","work","game","house"]; // Sun..Sat
+const KIND_LABEL = {reset:"Reset day",prep:"Prep day",work:"Work day",house:"House day",game:"Game day"};
+const KIND_PILL = {reset:"off",prep:"prep",work:"work",house:"off",game:"off"};
+const KIND_BLURB = {
+  reset:"The catch-up day. Chores come first, then the rest of the day is yours.",
+  prep:"Groceries and 75 minutes of cooking, all finished before peak hours.",
+  work:"Shower, eat, a 30-minute chore block, then games until you leave. Nothing at home is scheduled between 11:30 AM and 5:30 PM.",
+  house:"Bathroom and kitchen first, then the day is yours.",
+  game:"Shower, eat, 10 minutes of tidying. The rest of the day is games."};
+const CAT = {care:"You",eat:"Eat",house:"House",work:"Work",play:"Play",sleep:"Sleep",peak:"Power"};
+const JOB = {2:"wipe the kitchen counters and stove",3:"clean the bathroom sink, toilet and mirror",4:"sweep or vacuum the main room"};
+const fmt = t=>{ const h=Math.floor(t/60)%24, m=t%60; return ((h+11)%12+1)+":"+String(m).padStart(2,"0")+(h<12?" AM":" PM"); };
+// Sleep steps: wake and lights-out move earlier every 3 days. Minutes from midnight.
+const WAKES = [570,510,450,420], BEDS = [1470,1410,1350,1320];
+// Rows are [minutes, category, title, detail]; {m:n} pulls that meal from the rotation. W = wake, L = lights out.
+function build(i,W,L,bento=true,mach=null,unload=false){
+  const kind = KIND[i], lunch = Math.max(720,W+240);
+  const r = [
+    [W,"care","Wake up","Alarm across the room so you have to stand up. Lights on, drink some water, and go straight to the shower."],
+    [W+10,"care","Shower and clean clothes","First thing, every day. The clothes are already laid out from last night."],
+    [W+45,"eat",{m:0}]];
+  if(kind==="work"){
+    r.push([W+65,"house","Chore block, 30 minutes",`${unload?"Unload the dishwasher, take":"Take"} out any trash, then ${JOB[i]}. Stop when the timer goes.`],
+      [W+95,"house","Pack lunch",bento?"Fill your bento from the prep containers and grab a rice bowl.":"Take a CookUnity meal."]);
+    if(675-(W+105)>=30) r.push([W+105,"play","Games","Free until 11:15."]);
+    if(mach==="L") r.push([W+5,"house","Start one laundry load","Before the shower, so it washes while you get ready."],
+      [W+60,"house","Laundry to the dryer","Right after breakfast."],
+      [W+125,"house","Fold laundry","Put it away as you fold."]);
+    r.push([690,"work","Leave for work","A 15–30 minute drive."],
+      [720,"work","Work, 12:00–5:00",bento?"Lunch is your bento, around 2:30.":"Lunch around 2:30."],
+      [870,"eat",{m:1}],
+      [1020,"work","Off work, head home","If work runs late, nothing below has to move. Dinner starts when you're home."],
+      [1050,"peak","Peak power hours until 9:00 PM","They started at 4 while you were at work. No washer, dryer or dishwasher tonight."]);
+  } else {
+    r.push([lunch,"eat",{m:1}],[960,"peak","Peak power hours until 9:00 PM","No washer, dryer or dishwasher. A good time for games."]);
+    if(unload) r.push([W+60,"house","Unload the dishwasher","It ran last night."]);
+    if(mach==="L") r.push([W+195,"house","Start one laundry load","One load: whatever is fullest, clothes or sheets and towels."],
+      [lunch+(kind==="prep"&&bento?25:30),"house","Laundry to the dryer","It has to finish before 4."],
+      [lunch+105,"house","Fold laundry","Put it away as you fold."]);
+    if(kind==="reset"){ r.push(
+      [W+75,"house","Trash sweep","One bag, every room, floor first. 20 minutes, then take the bag out."],
+      [W+100,"house","Dishes","Load the dishwasher and hand-wash what doesn't fit. 20 minutes."],
+      [W+130,"play","Break","30 minutes of games. Set a timer."],
+      [W+170,"house","Counters and stove","Clear them, wipe them. 15 minutes."],
+      [lunch+40,"house","Floors","Sweep or vacuum the main room. 20 minutes."]);
+      if(mach!=="L") r.push([lunch+65,"play","Done","Housework is over for the day."]); }
+    if(kind==="prep") r.push([W+75,"house","Tidy, trash and recycling out","15 minutes. Floor first, then the bins."]);
+    if(kind==="prep"&&bento) r.push(
+      [W+105,"house","Hardester's run","This week's produce. The list is in the Shopping tab."],
+      [lunch+30,"house","Meal prep, 75 minutes","Steps are in the Monday prep tab."],
+      [lunch+110,"house","Stack the prep dishes","Into the dishwasher. Hand-wash the pans."]);
+    if(kind==="house") r.push(
+      [W+90,"house","Bathroom","Shower, toilet, sink, floor. 30 minutes."],
+      [W+120,"house","Kitchen","Counters, stove, old food out of the fridge. 25 minutes."],
+      [W+165,"play","Free time",mach==="L"?"Only the laundry is left.":"Housework is done for the day."]);
+    if(kind==="game") r.push(
+      [W+65,"house","10-minute tidy","Trash and dishes only. That's all the housework today."],
+      [W+80,"play","Game day","All yours until bed."]);
+  }
+  r.push([1110,"eat",{m:2}],
+    [1140,"play","Games","Nothing in the house needs to run right now."],
+    [Math.min(L-120,1320),"eat",{m:3}],
+    mach==="D" ? [1260,"house","Run the dishwasher","Peak is over. Start it, then wipe the counter. 10 minutes."]
+               : [1260,"house","Rinse and load the dishwasher","It only runs on dishwasher days. Wipe the counter. 5 minutes."]);
+  if(L-45-1275>=30) r.push([1275,"play","Free time","Games, shows, whatever you want."]);
+  r.push([L-45,"care","Wind down",`Lay out tomorrow's clothes and brush your teeth. Games and the PC off at ${fmt(L-30)}.`],
+    [L-30,"sleep","In bed, YouTube on","Queue a long SCP or gaming video. Brightness down, screen turned away, autoplay off or a sleep timer set so it stops by itself."],
+    [L,"sleep","Lights out","Let the video run and just listen. Same time every night, so getting up gets easier."]);
+  return r.sort((a,b)=>a[0]-b[0]);
+}
+// Machines alternate: a machine runs every other day, laundry then dishwasher, so each runs once every 4 days.
+const MACH_START = Date.UTC(2026,9,5); // Mon Oct 5, 2026 = laundry day
+const machineFor = d=>{ const n = Math.round((Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())-MACH_START)/864e5), m = ((n%4)+4)%4; return m===0?"L":m===2?"D":null; };
+// END-PLAN-DATA
+const NOW = new Date(), TODAY = NOW.getDay();
+const SLEEP_START = new Date(2026,9,4); // step 1 begins Sun Oct 4, 2026
+const dayOnly = d=>new Date(d.getFullYear(),d.getMonth(),d.getDate());
+const dateFor = i=>{ const d = dayOnly(NOW); d.setDate(d.getDate()+((i-TODAY+7)%7)); return d; };
+const stageFor = d=>Math.max(0,Math.min(3,Math.floor(Math.round((dayOnly(d)-SLEEP_START)/864e5)/3)));
+const weekFor = d=>(((Math.round((mondayOf(d)-ANCHOR)/(7*864e5)))%4)+4)%4;
+const nice = d=>d.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"});
+{ const W0 = WAKES[stageFor(NOW)];
+  TIMES = {work:[fmt(W0+45),"2:30 PM","6:30 PM","Evening"], off:[fmt(W0+45),fmt(Math.max(720,W0+240)),"6:30 PM","Evening"]}; }
+let selDay = TODAY;
+const dayKey = "bento-day-"+NOW.getFullYear()+"-"+(NOW.getMonth()+1)+"-"+NOW.getDate();
+let dayDone = {};
+try{ dayDone = JSON.parse(localStorage.getItem(dayKey)||"{}"); }catch(e){ dayDone = {}; }
+
+function renderToday(){
+  const i = selDay, isToday = i===TODAY, kind = KIND[i], date = dateFor(i), st = stageFor(date), w = ROT[weekFor(date)];
+  const W = WAKES[st], L = BEDS[st], nowMin = NOW.getHours()*60+NOW.getMinutes();
+  const bento = date>=ANCHOR;
+  const mach = machineFor(date), yest = new Date(date); yest.setDate(yest.getDate()-1);
+  const items = build(i,W,L,bento,mach,machineFor(yest)==="D").filter(r=>bento||typeof r[2]!=="object"||r[2].m!==3).map(r=> typeof r[2]==="object" ? [r[0],r[1],NAMES[r[2].m], bento ? w.days[i][r[2].m] : (kind==="work"&&r[2].m===1 ? "CookUnity meal." : "CookUnity meal or whatever's on hand.")] : r).filter(r=>r[3]!=="—");
+  const label = !bento&&kind==="prep" ? "Day off" : KIND_LABEL[kind];
+  const blurb = !bento&&kind==="prep" ? "A quick tidy. Shopping and meal prep start Monday, Oct 12." : KIND_BLURB[kind];
+  let nowIdx = -1; if(isToday) items.forEach((r,k)=>{ if(r[0]<=nowMin) nowIdx = k; });
+  const total = items.filter(r=>r[1]!=="peak").length, done = items.filter((r,k)=>r[1]!=="peak"&&dayDone[k]).length;
+  const rows = items.map((r,k)=>{
+    const body = `<span class="t">${fmt(r[0])}</span><span class="b"><span class="cat">${CAT[r[1]]}</span><b>${r[2]}</b><span class="d">${r[3]}</span></span>`;
+    if(r[1]==="peak") return `<div class="row peak">${body}</div>`;
+    const cls = `row c-${r[1]}${k===nowIdx?" is-now":""}`;
+    return isToday ? `<label class="${cls}">${body}<input type="checkbox" id="dp-${k}" data-dp="${k}"${dayDone[k]?" checked":""} aria-label="Done: ${r[2]}"></label>` : `<div class="${cls}">${body}</div>`;
+  }).join("");
+  const letters = [1,2,3,4,5,6,0].map(n=>`<button type="button" data-d="${n}" aria-pressed="${n===i}" class="${n===TODAY?"current":""}" aria-label="${DAYNAMES[n]}${n===TODAY?" (today)":""}">${DAYNAMES[n][0]}</button>`).join("");
+  const next = new Date(SLEEP_START); next.setDate(next.getDate()+(st+1)*3);
+  const sleep = `Sleep step ${st+1} of 4: up at ${fmt(W)}, lights out at ${fmt(L)}.` + (st<3?` Both move earlier on ${nice(next)}.`:"");
+  document.getElementById("today").innerHTML =
+    `<div class="today-head"><div><div class="label">${isToday?"Today":nice(date)} · ${bento?`Week ${w.k} meals`:"Bento Week starts Oct 12"}</div><h2>${DAYNAMES[i]}</h2></div>
+       <div>${isToday?`<span class="done-count" id="done-count">${done} / ${total} done</span> `:""}<span class="pill ${!bento&&kind==="prep"?"off":KIND_PILL[kind]}">${label}</span></div></div>
+     <div class="switch" id="day-switch" role="group" aria-label="Day of the week">${letters}</div>
+     <p class="kind-blurb">${blurb}<br>${mach==="L"?"Machine today: laundry, one load.":mach==="D"?"Machine today: the dishwasher, at 9:00 PM.":"No machines today."} ${sleep}</p>
+     <div class="plan">${rows}</div>`;
+}
+document.getElementById("today").addEventListener("change", e=>{
+  const k = e.target.dataset.dp; if(k===undefined) return;
+  dayDone[k] = e.target.checked;
+  try{ localStorage.setItem(dayKey, JSON.stringify(dayDone)); }catch(err){}
+  const boxes = [...document.querySelectorAll("#today input[data-dp]")];
+  const c = document.getElementById("done-count"); if(c) c.textContent = `${boxes.filter(b=>b.checked).length} / ${boxes.length} done`;
+});
+function renderSwitches(){
+  ["week-switch","prep-switch"].forEach(id=>{
+    document.getElementById(id).innerHTML = ROT.map((w,i)=>
+      `<button type="button" data-i="${i}" aria-pressed="${i===sel}" class="${i===CUR?"current":""}" aria-label="Week ${w.k}${i===CUR?" (this week)":""}">${w.k}</button>`).join("");
+  });
+  const w = ROT[sel], badge = sel===CUR?`<span class="pill work">This week</span>`:sel===(CUR+1)%4?`<span class="pill off">Next week</span>`:"";
+  document.getElementById("week-title").innerHTML = `<b>Week ${w.k}:</b> ${w.name} ${badge}`;
+  document.getElementById("prep-title").innerHTML = `<b>Week ${w.k}:</b> ${w.name} ${badge}`;
+}
+function renderWeek(){
+  const today = new Date().getDay(), w = ROT[sel];
+  document.getElementById("days").innerHTML = [1,2,3,4,5,6,0].map(i=>{
+    const type = TYPES[i], t = TIMES[type==="work"?"work":"off"];
+    return `<div class="day${i===today&&sel===CUR?" is-today":""}"><div class="day-top"><b>${DAYNAMES[i]}</b><span class="pill ${type}">${TYPE_LABEL[type]}</span></div>
+      <div class="meals">${w.days[i].map((f,k)=>`<div><small>${NAMES[k]} · ${t[k]}</small>${f}</div>`).join("")}</div></div>`;
+  }).join("");
+}
+const PREP_DATE = dateFor(1)>=ANCHOR ? dateFor(1) : ANCHOR;
+const PREP_START = Math.max(720, WAKES[stageFor(PREP_DATE)]+240)+30;
+const shift = t=>{ const [h,m] = t.split(":").map(Number); return fmt(h*60+m-240+PREP_START); };
+function renderPrep(){
+  const w = ROT[sel];
+  document.getElementById("prep-h").textContent = `Monday prep, ${fmt(PREP_START)}–${fmt(PREP_START+75)}`;
+  const steps = [["4:00","Boil 6 eggs","6½ minutes, ice bath, peel, into the marinade. Ready by Tuesday morning."], ...w.prep,
+    ["4:55","Shape 6 onigiri",`Microwave 3 rice bowls, cool 2 minutes, press 2 per bowl in your kit's triangle molds. ${w.onigiri[0].toUpperCase()+w.onigiri.slice(1)} filling. Wrap each in plastic.`],
+    ["5:05","Portion into prep containers","Divide the proteins and sides into small containers. Each workday morning, fill your bento from them, take a sealed rice bowl, and wash the bento when you get home."]];
+  document.getElementById("prep-steps").innerHTML = steps.map(s=>`<li><span class="t">${shift(s[0])}</span><span><b>${s[1]}</b>${s[2]}</span></li>`).join("");
+}
+function renderRotation(){ renderSwitches(); renderWeek(); renderPrep(); }
+document.addEventListener("click", e=>{
+  const b = e.target.closest(".switch button"); if(!b) return;
+  if(b.dataset.d!==undefined){ selDay = +b.dataset.d; renderToday(); return; }
+  sel = +b.dataset.i; renderRotation();
+});
+
+const RECIPES = [
+  {n:"Teriyaki sauce",jp:"照り焼き",ing:["½ cup soy sauce","¼ cup mirin","2 tbsp sugar or honey","1 tbsp grated ginger, 2 garlic cloves"],how:"Simmer 3 minutes until slightly thick. Enough for 2 lb chicken or 3 salmon portions.",uses:"Week A chicken, Week C salmon, Week D chicken"},
+  {n:"Marinated eggs",jp:"味玉 ajitama",ing:["½ cup soy sauce","½ cup water","¼ cup mirin","1 tbsp sugar"],how:"Soak peeled 6½-minute eggs at least 6 hours, up to 4 days.",uses:"Workday breakfast, ramen"},
+  {n:"Miso soup",jp:"味噌汁",ing:["1½ cups water + ½ tsp dashi powder","Cubed tofu, pinch of dried wakame","1 tbsp miso","Green onion"],how:"Simmer the dashi, add tofu and wakame, turn off the heat, then whisk in the miso. Boiling it dulls the flavor.",uses:"Most dinners, off-day breakfast"},
+  {n:"Cucumber salad",jp:"酢の物 sunomono",ing:["2 cucumbers, thinly sliced","3 tbsp rice vinegar","1 tbsp sugar, 1 tsp soy sauce","Sesame seeds"],how:"Salt the cucumber 10 minutes, squeeze out the water, then dress.",uses:"Weeks A + D"},
+  {n:"Spinach side",jp:"胡麻和え goma-ae",ing:["1 bag spinach","1 tbsp soy sauce","1 tsp sugar, 1 tsp sesame oil","Sesame seeds"],how:"Wilt 30 seconds in boiling water, rinse cold, squeeze dry, dress.",uses:"Weeks A + C"},
+  {n:"Quick cabbage pickles",jp:"浅漬け asazuke",ing:["¼ head green cabbage, shredded","1 tsp salt","Splash of rice vinegar","Pinch of chili flakes (optional)"],how:"Massage the salt into the cabbage, rest 15 minutes, squeeze out the water, add vinegar. Keeps 4 days.",uses:"Weeks B + D"},
+  {n:"Carrot kinpira",jp:"きんぴら",ing:["2 carrots, cut into matchsticks","1 tsp sesame oil","1 tbsp soy sauce, 1 tbsp mirin, 1 tsp sugar","Sesame seeds"],how:"Stir-fry the carrots in sesame oil 3 minutes, add the seasonings, cook until glossy.",uses:"Week C"},
+  {n:"Ginger pork",jp:"生姜焼き shogayaki",ing:["1½ lb thin-sliced pork","3 tbsp soy sauce, 2 tbsp mirin, 1 tsp sugar","1 tbsp grated ginger","1 onion, sliced"],how:"Marinate the pork 10 minutes. Pan-fry with the onion until the sauce reduces and clings.",uses:"Week B"},
+  {n:"Miso salmon",jp:"鮭の味噌焼き",ing:["3 salmon portions","2 tbsp miso","1 tbsp mirin","1 tsp sugar"],how:"Mix the glaze, brush on the salmon, bake at 400°F for 12–15 minutes.",uses:"Week B"},
+  {n:"Chicken soboro",jp:"鶏そぼろ",ing:["1½ lb ground chicken","3 tbsp soy sauce, 2 tbsp mirin, 1 tbsp sugar","1 tsp grated ginger","4 eggs + pinch of sugar for the egg crumbles"],how:"Cook the chicken with the seasonings, stirring until fine and crumbly. Scramble the eggs into small curds separately. Serve side by side over rice.",uses:"Week C"},
+  {n:"Gyudon beef",jp:"牛丼",ing:["1½ lb shaved beef","1 onion, sliced","1 cup water + 1 tsp dashi powder","¼ cup soy sauce, ¼ cup mirin, 1 tbsp sugar"],how:"Simmer the onion in the sauce 3 minutes, add the beef, simmer 5–7 minutes. Top with green onion.",uses:"Week D"},
+  {n:"Fried rice",jp:"焼き飯 yakimeshi",ing:["3 rice bowls","3 eggs","Shrimp or leftover protein","Green onion, soy sauce, sesame oil"],how:"Scramble the eggs, add rice and break it up, add protein, season with soy and sesame oil. Makes extra for Monday.",uses:"Week D Sunday"},
+  {n:"Pork & cabbage stir-fry",jp:"野菜炒め",ing:["½ lb leftover pork or thin-sliced pork","¼ head cabbage, 1 carrot, ½ onion","2 tbsp soy sauce, 1 tbsp mirin","Black pepper"],how:"Stir-fry the pork, add the vegetables, cook 4–5 minutes, season. Makes extra for Monday.",uses:"Week B Sunday"},
+  {n:"Tuna-mayo onigiri",jp:"ツナマヨ おにぎり",ing:["1 microwave rice bowl per 2 onigiri","1 can tuna, drained","2 tbsp mayo + a few drops soy sauce","Salt for your hands, nori strip"],how:"Heat the rice, cool 2 minutes so you can handle it. Wet and salt your hands, press rice around a spoonful of filling. Add nori right before eating so it stays crisp. One can fills about 6. For Week C, add a squeeze of sriracha.",uses:"Weeks A + C"},
+  {n:"Pan-fried gyoza",jp:"餃子",ing:["Frozen gyoza","1 tbsp oil","¼ cup water","Soy sauce + rice vinegar to dip"],how:"Brown flat side down 2 minutes, add water, cover and steam 5 minutes, uncover until crisp.",uses:"Quick dinners every week"},
+  {n:"Upgraded pantry noodles",jp:"ラーメン",ing:["Any instant ramen or cup bowl","1 egg (marinated or cracked in)","Handful of spinach or frozen edamame","Green onion"],how:"Use half the seasoning packet to cut the salt, then add the egg and greens in the last minute. Turns a snack into a meal.",uses:"Off-day lunch, late nights"},
+  {n:"Easy add-ons",jp:"すぐできる",ing:["Curry rice from a roux block (box directions, 6–8 servings)","Kimchi fried rice bowl + a fried egg on top","Shrimp donburi: tempura or panko shrimp over a rice bowl with egg"],how:"",uses:"Fri–Sun"},
+  {n:"Sushi night",jp:"巻き寿司",ing:["Your SmileTools kit: mats, bazooka, nigiri and gunkan molds","Nori, rice vinegar, sugar, salt","2 rice bowls per roll, seasoned with 1 tbsp vinegar + 1 tsp sugar","Fillings: tuna-mayo, cucumber, avocado, Kirkland salmon"],how:"Your sticky medium-grain bowls work for simple rolls. Costco's frozen Kirkland salmon is commonly used raw at home, since it's farmed and frozen to safe standards. Start with cooked fillings if you'd rather not.",uses:"A weekend project"}
+];
+document.getElementById("recipe-list").innerHTML = RECIPES.map(r=>
+  `<div class="recipe"><h4>${r.n}</h4><div class="jp">${r.jp}</div><ul>${r.ing.map(x=>`<li>${x}</li>`).join("")}</ul>${r.how?`<p>${r.how}</p>`:""}<div class="uses">Used for: ${r.uses}</div></div>`).join("");
+
+const STORES = [
+  {id:"pantry",n:"Already in your pantry",when:"Use these first",items:[
+    ["Sushi kit (SmileTools 30-in-1)","Onigiri, musubi, nigiri molds + cucumber slicer"],
+    ["Canned tuna (in the garage)","Tuna-mayo onigiri, about 6 per can"],
+    ["bibigo tonkotsu ramen bowls","Friday lunch, add a marinated egg"],
+    ["bibigo kimchi fried rice bowls","Off-day breakfast with a fried egg"],
+    ["Instant noodles and pho bowls","Upgrade with egg + greens, half the seasoning"]]},
+  {id:"costco",n:"Costco",when:"Every ~2 weeks",items:[
+    ["bibigo cooked sticky white rice, 12-pack","About 17 bowls a week on this plan, so 3 boxes per trip"],
+    ["Kirkland frozen Atlantic salmon","3 portions most weeks, 1 in Week D"],
+    ["Boneless chicken thighs","Weeks A + D. Portion and freeze."],
+    ["Ground chicken","Week C soboro"],
+    ["Shaved beef (thin-sliced steak)","Week D gyudon"],
+    ["Thin-sliced pork","Week B ginger pork. Hardester's meat counter can slice a loin thin if Costco doesn't carry it."],
+    ["Eggs, 5 dozen",""],
+    ["Ajinomoto frozen gyoza","60-count, about $15"],
+    ["bibigo tonkotsu ramen + kimchi fried rice","Restock when low"],
+    ["Frozen tempura or panko shrimp","For donburi"],
+    ["Frozen shelled edamame",""],
+    ["Roasted seaweed / nori","Also your onigiri wrap"],
+    ["Mayo and soy sauce","Low-sodium soy if they have it"]]},
+  {id:"hardesters",n:"Hardester's, Middletown",when:"Weekly",items:[
+    ["Cucumbers, 2–4","Weeks A + D"],["Spinach, 1 bag","Weeks A + C"],["Green cabbage, 1 head","Weeks B + D"],["Carrots","Week C kinpira, Week B stir-fry"],
+    ["Onions, 2","Weeks B + D"],["Green onions, 2 bunches",""],["Fresh ginger and garlic",""],
+    ["Tofu, 1 block","Firm or silken"],["Clementines or other fruit","For snacks"],
+    ["Plastic wrap + 3–6 meal-prep containers","First trip only"]]},
+  {id:"go",n:"Grocery Outlet, Hidden Valley",when:"Grab when you see them",items:[
+    ["Japanese curry roux blocks","S&B Golden Curry or Vermont Curry"],["Ramen or udon noodles","Fresh or dried, not instant cups"],
+    ["Rice vinegar",""],["Mirin",""],["Sesame oil + sesame seeds",""],["Furikake",""],["Rice crackers (senbei)",""]]},
+  {id:"online",n:"Japantown trip (or order online)",when:"Once; lasts months",items:[
+    ["Miso paste","Keeps about a year refrigerated"],["Dashi powder",""],["Dried wakame",""],
+    ["Onigiri seaweed wrappers","Film-wrapped nori that stays crisp"],
+    ["Bento box with a carrier or wrap","One is enough with prep containers"],
+    ["Small prep containers, 6–9","For portioning Monday's cooking"]]}
+];
+let saved = {};
+try{ saved = JSON.parse(localStorage.getItem("bento-checks")||"{}"); }catch(e){ saved = {}; }
+function persist(){ try{ localStorage.setItem("bento-checks", JSON.stringify(saved)); }catch(e){} }
+function renderStores(){
+  document.getElementById("stores").innerHTML = STORES.map(s=>{
+    const done = s.items.filter((_,k)=>saved[s.id+k]).length;
+    return `<div class="store"><div class="store-head"><div><h4>${s.n}</h4><div class="label">${s.when}</div></div><span class="count" id="c-${s.id}">${done} / ${s.items.length}</span></div>
+      ${s.items.map((it,k)=>`<label class="check"><input type="checkbox" id="ck-${s.id}-${k}" data-key="${s.id+k}" data-store="${s.id}"${saved[s.id+k]?" checked":""}><span>${it[0]}${it[1]?`<small>${it[1]}</small>`:""}</span></label>`).join("")}</div>`;
+  }).join("");
+}
+document.getElementById("stores").addEventListener("change", e=>{
+  const el = e.target; if(!el.dataset.key) return;
+  saved[el.dataset.key] = el.checked; persist();
+  const s = STORES.find(x=>x.id===el.dataset.store);
+  document.getElementById("c-"+s.id).textContent = `${s.items.filter((_,k)=>saved[s.id+k]).length} / ${s.items.length}`;
+});
+document.getElementById("reset").addEventListener("click", ()=>{ saved = {}; persist(); renderStores(); });
+
+const tabs = [...document.querySelectorAll('[role="tab"]')];
+function show(id){
+  tabs.forEach(t=>{ const on = t.getAttribute("aria-controls")===id; t.setAttribute("aria-selected", on); document.getElementById(t.getAttribute("aria-controls")).hidden = !on; });
+  try{ localStorage.setItem("bento-tab", id); }catch(e){}
+}
+tabs.forEach(t=>t.addEventListener("click", ()=>show(t.getAttribute("aria-controls"))));
+renderToday(); renderRotation(); renderStores();
+let start = location.hash.slice(1);
+if(!["week","prep","recipes","shop"].includes(start)){ try{ start = localStorage.getItem("bento-tab")||"week"; }catch(e){ start = "week"; } }
+show(start);
+// Android app bridge: when this page runs inside the Bento Week app, hand it the next 45 days of steps so it can alert on its own.
+function appSchedule(){
+  if(!window.BentoApp) return;
+  const out = [], base = dayOnly(new Date());
+  for(let n=0;n<45;n++){
+    const date = new Date(base); date.setDate(base.getDate()+n);
+    const i = date.getDay(), st = stageFor(date), bento = date>=ANCHOR, w = ROT[weekFor(date)], kind = KIND[i];
+    const yest = new Date(date); yest.setDate(yest.getDate()-1);
+    build(i,WAKES[st],BEDS[st],bento,machineFor(date),machineFor(yest)==="D").forEach(r=>{
+      let title = r[2], text = r[3];
+      if(typeof title==="object"){
+        const m = title.m; if(!bento&&m===3) return;
+        text = bento ? w.days[i][m] : (kind==="work"&&m===1 ? "CookUnity meal." : "CookUnity meal or whatever's on hand.");
+        if(text==="—") return; title = NAMES[m];
+      }
+      const t = new Date(date.getFullYear(),date.getMonth(),date.getDate(),0,r[0]).getTime();
+      const alarm = (title==="Wake up"||title==="Leave for work"||title==="Wind down") ? 1 : 0;
+      out.push({t,title,text,alarm});
+      if(title==="Wake up") [[5,"Wake up 2: stand up now"],[10,"Wake up 3: shower time"],[20,"Last call: out of bed"]].forEach(x=>out.push({t:t+x[0]*60000,title:x[1],text:"Feet on the floor.",alarm:1}));
+    });
+  }
+  out.sort((a,b)=>a.t-b.t);
+  try{ window.BentoApp.setSchedule(JSON.stringify(out)); }catch(e){}
+}
+appSchedule();
+</script>
+
+</body>
+</html>

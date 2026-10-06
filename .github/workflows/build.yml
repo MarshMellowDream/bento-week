@@ -1,0 +1,36 @@
+name: Build app
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - name: Build the app
+        run: gradle :app:assembleDebug --no-daemon --stacktrace
+      - name: Name the file
+        run: cp app/build/outputs/apk/debug/app-debug.apk BentoWeek.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: BentoWeek
+          path: BentoWeek.apk
+      - name: Publish a download link
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ github.run_number }}
+          name: Bento Week build ${{ github.run_number }}
+          files: BentoWeek.apk

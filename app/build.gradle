@@ -1,0 +1,39 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.bentoweek.app'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'com.bentoweek.app'
+        minSdk 29
+        targetSdk 34
+        // Each GitHub build gets a higher number, so a new build installs over the old one.
+        versionCode((System.getenv('GITHUB_RUN_NUMBER') ?: '1').toInteger())
+        versionName('1.' + (System.getenv('GITHUB_RUN_NUMBER') ?: '0'))
+    }
+
+    // One fixed key in the repo, so every build has the same signature and updates install
+    // without uninstalling. It is a throwaway key for a personal, sideloaded app.
+    signingConfigs {
+        debug {
+            storeFile file('debug.keystore')
+            storePassword 'android'
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+        }
+    }
+
+    buildTypes {
+        debug {
+            signingConfig signingConfigs.debug
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
