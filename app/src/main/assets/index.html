@@ -155,7 +155,7 @@ footer a{color:var(--ai)}
 
   <section id="week" role="tabpanel" aria-labelledby="t-week">
     <h3>The week</h3>
-    <p class="lead">Cooking starts Monday, Oct 12 with Week A. Four weeks rotate (A, B, C, D), each with different proteins, sides, onigiri and weekend meals, then it starts over. The dot marks this week; tap a letter to see what's coming. Meal times follow your wake-up time in the day plan above.</p>
+    <p class="lead">Cooking starts Monday, Oct 19 with Week A. Four weeks rotate (A, B, C, D), each with different proteins, sides, onigiri and weekend meals, then it starts over. The dot marks this week; tap a letter to see what's coming. Meal times follow your wake-up time in the day plan above.</p>
     <div class="switch" id="week-switch" role="group" aria-label="Rotation week"></div>
     <p class="wk-title" id="week-title"></p>
     <div class="days" id="days"></div>
@@ -251,7 +251,7 @@ const ROT = [
    ["4:35","Flake the salmon","Flake it with a fork and mix in a few drops of soy for the onigiri filling."],
    ["4:40","Make the sides","Cucumber salad and quick cabbage pickles."]]}
 ];
-const ANCHOR = new Date(2026,9,12); // Monday Oct 12, 2026 = Week A, the first Bento week
+const ANCHOR = new Date(2026,9,19); // Monday Oct 19, 2026 = Week A, the first Bento week
 function mondayOf(d){ const m = new Date(d.getFullYear(),d.getMonth(),d.getDate()); m.setDate(m.getDate()-((m.getDay()+6)%7)); return m; }
 const STARTED = mondayOf(new Date())>=ANCHOR;
 const CUR = STARTED ? (((Math.round((mondayOf(new Date())-ANCHOR)/(7*864e5)))%4)+4)%4 : -1;
@@ -329,7 +329,60 @@ function build(i,W,L,bento=true,mach=null,unload=false){
 }
 // Machines alternate: a machine runs every other day, laundry then dishwasher, so each runs once every 4 days.
 const MACH_START = Date.UTC(2026,9,5); // Mon Oct 5, 2026 = laundry day
-const machineFor = d=>{ const n = Math.round((Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())-MACH_START)/864e5), m = ((n%4)+4)%4; return m===0?"L":m===2?"D":null; };
+// Dog-sitting trip: away Fri Oct 9 to Mon Oct 12, drive home Tue Oct 13. No machines while away;
+// the cycle restarts with laundry on Wed Oct 14, the first day back.
+const AWAY_FROM = Date.UTC(2026,9,9), AWAY_TO = Date.UTC(2026,9,13), MACH_RESTART = Date.UTC(2026,9,14);
+const utcDay = d=>Date.UTC(d.getFullYear(),d.getMonth(),d.getDate());
+const tripFor = d=>{ const u = utcDay(d); return u>=AWAY_FROM&&u<AWAY_TO ? "away" : u===AWAY_TO ? "travel" : null; };
+const machineFor = d=>{ const u = utcDay(d); if(u>=AWAY_FROM&&u<=AWAY_TO) return null;
+  const n = Math.round((u-(u>=MACH_RESTART?MACH_RESTART:MACH_START))/864e5), m = ((n%4)+4)%4; return m===0?"L":m===2?"D":null; };
+function buildTrip(W,L,trip){
+  const lunch = Math.max(720,W+240);
+  const r = [
+    [W,"care","Wake up","Change into clean clothes. No shower needed while you're away."],
+    [W+15,"house","Dogs: breakfast and a walk","Feed both dogs, fresh water, then a walk."],
+    [W+45,"eat",{m:0}]];
+  if(trip==="away"){
+    r.push([lunch,"eat",{m:1}],
+      [lunch+15,"house","Dogs: let them out","Quick potty break and a water check."],
+      [1050,"house","Dogs: dinner and a walk","Feed both dogs, then an evening walk."],
+      [1110,"eat",{m:2}],
+      [1140,"play","Games","Laptop time. Nothing else needs doing."],
+      [L-60,"house","Dogs: last trip outside","Then everyone settles in for the night."]);
+    if(L-45-1275>=30) r.push([1275,"play","Free time","Games, shows, whatever you want."]);
+  } else {
+    r.push([W+60,"work","Tell work when you'll get in","Send a quick message with your arrival time."],
+      [W+75,"house","Pack up","Your things, both dogs' food and bowls, chargers, the laptop."],
+      [W+105,"house","Hand off the house","Last walk and water for the dog you're sitting, then lock up."],
+      [W+120,"work","Drive home","Go straight to work when you get in."],
+      [720,"work","Work, 12:00–5:00","Arriving late today. Lunch when you can."],
+      [870,"eat",{m:1}],
+      [1020,"work","Off work, head home","Dinner starts when you're home."],
+      [1050,"house","Feed your dog","Dinner and fresh water."],
+      [1110,"eat",{m:2}],
+      [1140,"house","Unpack","Dirty clothes in the hamper. Laundry runs tomorrow."],
+      [1170,"play","Games","Nothing else needs doing tonight."],
+      [1260,"house","Rinse and load the dishwasher","It only runs on dishwasher days. Wipe the counter. 5 minutes."]);
+  }
+  r.push([L-45,"care","Wind down",`Brush your teeth and lay out tomorrow's clothes. Laptop off at ${fmt(L-30)}.`],
+    [L-30,"sleep","In bed, YouTube on","Queue a long SCP or gaming video. Brightness down, screen turned away, autoplay off or a sleep timer set so it stops by itself."],
+    [L,"sleep","Lights out","Let the video run and just listen. Same time every night, so getting up gets easier."]);
+  return r.sort((a,b)=>a[0]-b[0]);
+}
+// Final rows for a date: [minutes, category, title, text], with meal text filled in.
+function itemsFor(date){
+  const i = date.getDay(), kind = KIND[i], st = stageFor(date), W = WAKES[st], L = BEDS[st];
+  const w = ROT[weekFor(date)], bento = date>=ANCHOR, trip = tripFor(date);
+  const yest = new Date(date); yest.setDate(yest.getDate()-1);
+  const rows = trip ? buildTrip(W,L,trip) : build(i,W,L,bento,machineFor(date),machineFor(yest)==="D");
+  return rows.filter(r=>bento||typeof r[2]!=="object"||r[2].m!==3).map(r=>{
+    if(typeof r[2]!=="object") return r;
+    const m = r[2].m;
+    const text = trip ? (trip==="travel"&&m===1 ? "Grab something on the road or at work." : "Whatever's on hand.")
+      : bento ? w.days[i][m] : (kind==="work"&&m===1 ? "CookUnity meal." : "CookUnity meal or whatever's on hand.");
+    return [r[0],r[1],NAMES[m],text];
+  }).filter(r=>r[3]!=="—");
+}
 // END-PLAN-DATA
 const NOW = new Date(), TODAY = NOW.getDay();
 const SLEEP_START = new Date(2026,9,4); // step 1 begins Sun Oct 4, 2026
@@ -350,9 +403,10 @@ function renderToday(){
   const W = WAKES[st], L = BEDS[st], nowMin = NOW.getHours()*60+NOW.getMinutes();
   const bento = date>=ANCHOR;
   const mach = machineFor(date), yest = new Date(date); yest.setDate(yest.getDate()-1);
-  const items = build(i,W,L,bento,mach,machineFor(yest)==="D").filter(r=>bento||typeof r[2]!=="object"||r[2].m!==3).map(r=> typeof r[2]==="object" ? [r[0],r[1],NAMES[r[2].m], bento ? w.days[i][r[2].m] : (kind==="work"&&r[2].m===1 ? "CookUnity meal." : "CookUnity meal or whatever's on hand.")] : r).filter(r=>r[3]!=="—");
-  const label = !bento&&kind==="prep" ? "Day off" : KIND_LABEL[kind];
-  const blurb = !bento&&kind==="prep" ? "A quick tidy. Shopping and meal prep start Monday, Oct 12." : KIND_BLURB[kind];
+  const items = itemsFor(date), trip = tripFor(date);
+  const label = trip==="away" ? "Away: dog sitting" : trip==="travel" ? "Travel day" : !bento&&kind==="prep" ? "Day off" : KIND_LABEL[kind];
+  const pillCls = trip==="travel" ? "work" : trip ? "off" : !bento&&kind==="prep" ? "off" : KIND_PILL[kind];
+  const blurb = trip==="away" ? "No chores and no machines. Look after the dogs, eat, game, and keep the sleep times." : trip==="travel" ? "Drive home and head to work, arriving late. Unpack tonight; laundry runs tomorrow." : !bento&&kind==="prep" ? "A quick tidy. Shopping and meal prep start Monday, Oct 19." : KIND_BLURB[kind];
   let nowIdx = -1; if(isToday) items.forEach((r,k)=>{ if(r[0]<=nowMin) nowIdx = k; });
   const total = items.filter(r=>r[1]!=="peak").length, done = items.filter((r,k)=>r[1]!=="peak"&&dayDone[k]).length;
   const rows = items.map((r,k)=>{
@@ -365,8 +419,8 @@ function renderToday(){
   const next = new Date(SLEEP_START); next.setDate(next.getDate()+(st+1)*3);
   const sleep = `Sleep step ${st+1} of 4: up at ${fmt(W)}, lights out at ${fmt(L)}.` + (st<3?` Both move earlier on ${nice(next)}.`:"");
   document.getElementById("today").innerHTML =
-    `<div class="today-head"><div><div class="label">${isToday?"Today":nice(date)} · ${bento?`Week ${w.k} meals`:"Bento Week starts Oct 12"}</div><h2>${DAYNAMES[i]}</h2></div>
-       <div>${isToday?`<span class="done-count" id="done-count">${done} / ${total} done</span> `:""}<span class="pill ${!bento&&kind==="prep"?"off":KIND_PILL[kind]}">${label}</span></div></div>
+    `<div class="today-head"><div><div class="label">${isToday?"Today":nice(date)} · ${bento?`Week ${w.k} meals`:"Bento Week starts Oct 19"}</div><h2>${DAYNAMES[i]}</h2></div>
+       <div>${isToday?`<span class="done-count" id="done-count">${done} / ${total} done</span> `:""}<span class="pill ${pillCls}">${label}</span></div></div>
      <div class="switch" id="day-switch" role="group" aria-label="Day of the week">${letters}</div>
      <p class="kind-blurb">${blurb}<br>${mach==="L"?"Machine today: laundry, one load.":mach==="D"?"Machine today: the dishwasher, at 9:00 PM.":"No machines today."} ${sleep}</p>
      <div class="plan">${rows}</div>`;
@@ -465,11 +519,12 @@ const STORES = [
   {id:"go",n:"Grocery Outlet, Hidden Valley",when:"Grab when you see them",items:[
     ["Japanese curry roux blocks","S&B Golden Curry or Vermont Curry"],["Ramen or udon noodles","Fresh or dried, not instant cups"],
     ["Rice vinegar",""],["Mirin",""],["Sesame oil + sesame seeds",""],["Furikake",""],["Rice crackers (senbei)",""]]},
-  {id:"online",n:"Japantown trip (or order online)",when:"Once; lasts months",items:[
+  {id:"online",n:"Japantown + Jagalchi (Serramonte)",when:"During the dog-sitting trip",items:[
     ["Miso paste","Keeps about a year refrigerated"],["Dashi powder",""],["Dried wakame",""],
     ["Onigiri seaweed wrappers","Film-wrapped nori that stays crisp"],
     ["Bento box with a carrier or wrap","One is enough with prep containers"],
-    ["Small prep containers, 6–9","For portioning Monday's cooking"]]}
+    ["Small prep containers, 6–9","For portioning Monday's cooking"],
+    ["Cooler bag and ice","Only if you buy anything cold or frozen"]]}
 ];
 let saved = {};
 try{ saved = JSON.parse(localStorage.getItem("bento-checks")||"{}"); }catch(e){ saved = {}; }
@@ -505,19 +560,12 @@ function appSchedule(){
   const out = [], base = dayOnly(new Date());
   for(let n=0;n<45;n++){
     const date = new Date(base); date.setDate(base.getDate()+n);
-    const i = date.getDay(), st = stageFor(date), bento = date>=ANCHOR, w = ROT[weekFor(date)], kind = KIND[i];
-    const yest = new Date(date); yest.setDate(yest.getDate()-1);
-    build(i,WAKES[st],BEDS[st],bento,machineFor(date),machineFor(yest)==="D").forEach(r=>{
-      let title = r[2], text = r[3];
-      if(typeof title==="object"){
-        const m = title.m; if(!bento&&m===3) return;
-        text = bento ? w.days[i][m] : (kind==="work"&&m===1 ? "CookUnity meal." : "CookUnity meal or whatever's on hand.");
-        if(text==="—") return; title = NAMES[m];
-      }
+    itemsFor(date).forEach(r=>{
+      const title = r[2], text = r[3];
       const t = new Date(date.getFullYear(),date.getMonth(),date.getDate(),0,r[0]).getTime();
-      const alarm = (title==="Wake up"||title==="Leave for work"||title==="Wind down") ? 1 : 0;
+      const alarm = (title==="Wake up"||title==="Leave for work"||title==="Wind down"||title==="Drive home") ? 1 : 0;
       out.push({t,title,text,alarm});
-      if(title==="Wake up") [[5,"Wake up 2: stand up now"],[10,"Wake up 3: shower time"],[20,"Last call: out of bed"]].forEach(x=>out.push({t:t+x[0]*60000,title:x[1],text:"Feet on the floor.",alarm:1}));
+      if(title==="Wake up") [[5,"Wake up 2: stand up now"],[10,"Wake up 3: up and dressed"],[20,"Last call: out of bed"]].forEach(x=>out.push({t:t+x[0]*60000,title:x[1],text:"Feet on the floor.",alarm:1}));
     });
   }
   out.sort((a,b)=>a.t-b.t);
