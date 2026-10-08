@@ -10,6 +10,8 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.webkit.JavascriptInterface;
+import android.webkit.ValueCallback;
+import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -21,8 +23,12 @@ public class MainActivity extends Activity {
     /** Reload the page when the app comes back after this long, so the day and "now" are right. */
     private static final long STALE_MS = 2L * 60L * 1000L;
 
+    private static final int PICK_PHOTO = 42;
+
     private WebView web;
     private long loadedAt;
+    /** The page's pending photo request, answered when the gallery returns. */
+    private ValueCallback<Uri[]> photoCallback;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +56,20 @@ public class MainActivity extends Activity {
                 return true;
             }
         });
+        web.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public boolean onShowFileChooser(WebView view, ValueCallback<Uri[]> callback, FileChooserParams params) {
+                if (photoCallback != null) photoCallback.onReceiveValue(null);
+                photoCallback = callback;
+                try {
+                    startActivityForResult(params.createIntent(), PICK_PHOTO);
+                } catch (Exception e) {
+                    photoCallback = null;
+                    return false;
+                }
+                return true;
+            }
+        });
         setContentView(web);
         web.loadUrl(PAGE);
         loadedAt = System.currentTimeMillis();
@@ -69,6 +89,15 @@ public class MainActivity extends Activity {
             loadedAt = now;
         }
         Scheduler.scheduleNext(this);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == PICK_PHOTO && photoCallback != null) {
+            photoCallback.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(resultCode, data));
+            photoCallback = null;
+        }
     }
 
     @Override

@@ -6,204 +6,216 @@
 <style>html{-webkit-text-size-adjust:100%}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Bento Week</title>
 <style>
-/* Layout: Windows Phone style. A tile home screen on black; each tile opens a full-screen "pivot" page with a big lowercase title. */
+/* Layout: Windows Phone 8.1. Start screen of accent-colored live tiles (optionally windows onto one background photo),
+   an arrow down to the all-sections list, pivot pages with a small uppercase app title and big lowercase headers,
+   and a round-button app bar along the bottom. */
 :root{
-  --bg:#000; --fg:#fff; --dim:#a6a6a6; --line:#2b2b2b; --panel:#1a1a1a;
-  --cobalt:#0050ef; --magenta:#d80073; --orange:#fa6800; --lime:#8cbf26; --teal:#00aba9;
-  --red:#e51400; --purple:#6a00ff; --brown:#825a2c; --steel:#647687; --emerald:#008a00; --amber:#f0a30a;
-  --font:"Segoe UI","Selawik","Roboto","Helvetica Neue",Arial,sans-serif;
+  --bg:#000; --fg:#fff; --dim:#9a9a9a; --line:#262626; --panel:#1f1f1f; --bar:#1f1f1f;
+  --accent:#1ba1e2;
+  --font:"Segoe WP","Segoe UI","Selawik",sans-serif;
   color-scheme:dark;
 }
 *{box-sizing:border-box}
 html,body{background:var(--bg);color:var(--fg)}
-body{font-family:var(--font);font-size:15px;line-height:1.45;-webkit-tap-highlight-color:transparent}
+body{font-family:var(--font);font-size:15px;line-height:1.45;-webkit-tap-highlight-color:transparent;overscroll-behavior-y:none}
 button,input,select,textarea{font:inherit;color:inherit}
-.wrap{max-width:900px;margin:0 auto;padding-inline:16px;padding-block:20px 48px}
+.wrap{max-width:920px;margin:0 auto;padding-inline:16px;padding-block:14px 110px}
 .view[hidden]{display:none!important}
+.view.enter{animation:turnstile .32s cubic-bezier(.1,.9,.2,1) both;transform-origin:0 50%}
+@keyframes turnstile{from{opacity:0;transform:perspective(900px) rotateY(-70deg)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.view.enter{animation:none}}
 
-/* Home */
-.home-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:16px}
-.home-head h1{font-weight:300;font-size:40px;line-height:1;margin:0;letter-spacing:-.5px}
-.home-head .clock{text-align:right;color:var(--dim);font-size:13px;line-height:1.3}
-.home-head .clock b{display:block;color:var(--fg);font-weight:300;font-size:28px;font-variant-numeric:tabular-nums}
-.tiles{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:86px;grid-auto-flow:row dense;gap:8px}
+/* ---------- Start screen ---------- */
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:86px;grid-auto-flow:row dense;gap:6px;position:relative}
 @media (min-width:640px){.tiles{grid-template-columns:repeat(6,1fr)}}
-.tile{position:relative;border:0;padding:10px;text-align:left;cursor:pointer;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;min-width:0;color:#fff}
-.tile:active{transform:scale(.97)}
+.tile{position:relative;border:0;padding:0;margin:0;text-align:left;cursor:pointer;overflow:hidden;min-width:0;color:#fff;background:var(--accent);
+  transform:perspective(500px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) scale(var(--s,1));transition:transform .12s}
+.tile.bgwin{background-color:transparent;background-repeat:no-repeat}
+.tile.bgwin::before{content:"";position:absolute;inset:0;background:rgba(0,0,0,.18)}
 .tile:focus-visible{outline:3px solid #fff;outline-offset:2px}
 .t11{grid-column:span 1}
-.t21{grid-column:span 2}
 .t22{grid-column:span 2;grid-row:span 2}
 .t42{grid-column:span 4;grid-row:span 2}
-.tile .name{font-size:13px;font-weight:400;text-transform:lowercase;opacity:.95}
-.tile .big{font-size:46px;font-weight:300;line-height:1}
-.tile .mid{font-size:19px;font-weight:300;line-height:1.2}
-.tile .small{font-size:13px;opacity:.9;line-height:1.3}
-.tile .glyph{font-size:34px;font-weight:300;line-height:1;align-self:center;margin:auto 0}
-.tile .count{position:absolute;top:8px;right:10px;font-size:22px;font-weight:300}
-.tile .clip{overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3}
-.c-cobalt{background:var(--cobalt)} .c-magenta{background:var(--magenta)} .c-orange{background:var(--orange)} .c-lime{background:var(--lime)}
-.c-teal{background:var(--teal)} .c-red{background:var(--red)} .c-purple{background:var(--purple)} .c-brown{background:var(--brown)}
-.c-steel{background:var(--steel)} .c-emerald{background:var(--emerald)} .c-amber{background:var(--amber)}
+.face{position:absolute;inset:0;padding:8px 10px 26px;display:flex;flex-direction:column;justify-content:flex-start;transition:transform .55s cubic-bezier(.1,.9,.2,1)}
+.face+.face{transform:translateY(100%)}
+.tile[data-face="1"] .face:nth-of-type(1){transform:translateY(-100%)}
+.tile[data-face="1"] .face:nth-of-type(2){transform:none}
+.tile[data-face="2"] .face:nth-of-type(1){transform:translateY(-100%)}
+.tile[data-face="2"] .face:nth-of-type(2){transform:translateY(-100%)}
+.tile[data-face="2"] .face:nth-of-type(3){transform:none}
+@media (prefers-reduced-motion:reduce){.face{transition:none}}
+.face.pic{padding:0;background-size:cover;background-position:center}
+.face.pic::after{content:"";position:absolute;left:0;right:0;bottom:0;height:46%;background:linear-gradient(transparent,rgba(0,0,0,.6))}
+.face.art{padding:0;display:block}
+.face.art svg{width:100%;height:100%;display:block}
+.face .cap{position:absolute;left:10px;right:10px;bottom:26px;z-index:1;font-size:14px;line-height:1.25;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+.tile .label{position:absolute;left:8px;bottom:5px;font-size:13px;z-index:2;text-transform:lowercase;text-shadow:0 1px 2px rgba(0,0,0,.35)}
+.tile .badge{position:absolute;right:8px;bottom:3px;font-size:17px;z-index:2;font-variant-numeric:tabular-nums}
+.t11 .face{padding:0;align-items:center;justify-content:center}
+.t11 .face svg{width:46%;height:46%}
+.icon-c{flex:1;display:flex;align-items:center;justify-content:center}
+.icon-c svg{width:56px;height:56px}
+.big{font-size:54px;font-weight:300;line-height:1}
+.mid{font-size:22px;font-weight:300;line-height:1.2}
+.lead{font-size:15px;line-height:1.3}
+.small{font-size:13px;line-height:1.3;opacity:.92}
+.clip3{overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3}
+.list3 div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:14px;line-height:1.5}
+.list3 span{opacity:.75;margin-right:6px;font-variant-numeric:tabular-nums}
+.allapps{display:block;margin:18px 0 0 auto;width:44px;height:44px;border:2px solid var(--fg);border-radius:50%;background:transparent;cursor:pointer}
+.allapps svg{display:block;margin:auto}
 
-/* Pages */
-.page-head{display:flex;align-items:center;gap:12px;margin:0 0 6px}
-.back{border:2px solid var(--fg);background:transparent;border-radius:50%;width:38px;height:38px;flex:none;cursor:pointer;font-size:18px;line-height:1}
-.page-head h2{font-weight:300;font-size:42px;margin:0;line-height:1;text-transform:lowercase;letter-spacing:-.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sub{color:var(--dim);margin:6px 0 16px;font-size:14px}
-.sec{font-size:22px;font-weight:300;margin:22px 0 8px;text-transform:lowercase}
+/* ---------- Pivot pages ---------- */
+.apptitle{font-size:13px;font-weight:600;letter-spacing:.04em;margin:2px 0 0}
+.pivots{display:flex;gap:18px;white-space:nowrap;overflow:hidden;margin:0 0 12px;mask-image:linear-gradient(90deg,#000 80%,transparent)}
+.pivots button{background:none;border:0;padding:0;font-size:46px;font-weight:300;line-height:1.15;letter-spacing:-1px;color:#4d4d4d;cursor:pointer;text-transform:lowercase}
+.pivots button[aria-current="true"]{color:var(--fg)}
+.pagehead{font-size:46px;font-weight:300;line-height:1.15;letter-spacing:-1px;margin:0 0 12px;text-transform:lowercase}
+.sub{color:var(--dim);margin:0 0 14px;font-size:14px}
+.sec{font-size:24px;font-weight:300;margin:24px 0 8px;text-transform:lowercase}
+.acc{color:var(--accent)}
 .pills{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 12px}
-.pill{border:2px solid var(--fg);background:transparent;padding:4px 12px;cursor:pointer;font-size:14px;min-width:40px}
-.pill[aria-pressed="true"]{background:var(--fg);color:#000}
-.pill.now{border-color:var(--cobalt)}
+.pill{border:2px solid var(--fg);background:transparent;padding:4px 12px;cursor:pointer;font-size:15px;min-width:42px}
+.pill[aria-pressed="true"]{background:var(--accent);border-color:var(--accent)}
+.btn{border:2px solid var(--fg);background:transparent;padding:6px 16px;cursor:pointer;font-size:15px}
+.btn.solid{background:var(--accent);border-color:var(--accent)}
+.btn.warn{border-color:#e51400}
 .actions{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 14px}
-.btn{border:2px solid var(--fg);background:transparent;padding:6px 14px;cursor:pointer;font-size:14px}
-.btn.solid{background:var(--fg);color:#000}
-.btn.warn{border-color:var(--red);color:#ff6a5c}
 
-/* Day list */
-.day-meta{display:flex;flex-wrap:wrap;gap:6px 14px;color:var(--dim);font-size:13px;margin:0 0 12px}
+/* Day */
+.day-meta{display:flex;flex-wrap:wrap;gap:4px 16px;color:var(--dim);font-size:13px;margin:0 0 12px}
 .day-meta b{color:var(--fg);font-weight:400}
-.rows{border-top:1px solid var(--line)}
-.row{display:grid;grid-template-columns:70px 1fr auto;gap:12px;align-items:start;padding:11px 0 11px 10px;border-bottom:1px solid var(--line);border-left:4px solid var(--steel)}
+.row{display:grid;grid-template-columns:66px 1fr auto;gap:12px;align-items:start;padding:10px 0;border-bottom:1px solid var(--line)}
 label.row{cursor:pointer}
-.row .t{font-variant-numeric:tabular-nums;color:var(--dim);font-size:14px;padding-top:1px}
+.row .t{font-variant-numeric:tabular-nums;color:var(--dim);font-size:14px;padding-top:2px}
 .row .b{min-width:0}
-.row b{display:block;font-weight:400;font-size:16px}
+.row b{display:block;font-weight:400;font-size:18px;line-height:1.25}
 .row .d{display:block;color:var(--dim);font-size:13px}
-.row .tag{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--dim)}
-.row input{width:22px;height:22px;margin:2px 4px 0 0;accent-color:var(--lime)}
-.row:has(input:checked) b{text-decoration:line-through;color:var(--dim)}
-.row.is-now{background:#0d1f3d}
-.row.k-care{border-left-color:var(--magenta)} .row.k-eat{border-left-color:var(--orange)} .row.k-house{border-left-color:var(--teal)}
-.row.k-work{border-left-color:var(--cobalt)} .row.k-play{border-left-color:var(--purple)} .row.k-sleep{border-left-color:var(--steel)}
-.row.k-mine{border-left-color:var(--lime)} .row.k-dog{border-left-color:var(--amber)} .row.k-peak{border-left-color:var(--red);background:#1c0805}
-.row.shifted .t{color:#ff9d8a}
+.row .tag{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--accent)}
+.row input{width:22px;height:22px;margin:3px 2px 0 0;accent-color:var(--accent)}
+.row:has(input:checked) b{color:var(--dim);text-decoration:line-through}
+.row.is-now .t,.row.is-now b{color:var(--accent)}
+.row.k-peak b{color:#ff6a4d}
+.row.shifted .t{color:#ffb38a}
+.sheet{background:var(--panel);padding:14px;margin:0 0 14px}
 
 /* Calendar */
-.cal-nav{display:flex;align-items:center;justify-content:space-between;margin:0 0 10px}
-.cal-nav b{font-size:22px;font-weight:300}
-.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal-title{font-size:24px;font-weight:300;margin:0 0 8px}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
 .cal .dow{font-size:12px;color:var(--dim);text-align:center;padding:2px 0}
 .cell{aspect-ratio:1/1;background:var(--panel);border:0;padding:4px;text-align:left;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;min-width:0;color:var(--fg)}
 .cell.out{opacity:.35}
-.cell.today{background:var(--cobalt)}
-.cell .n{font-size:16px;font-weight:300}
+.cell.today{background:var(--accent)}
+.cell .n{font-size:17px;font-weight:300}
 .cell .dots{display:flex;gap:3px;flex-wrap:wrap}
 .cell .dot{width:7px;height:7px}
 .legend{display:flex;flex-wrap:wrap;gap:6px 14px;color:var(--dim);font-size:12px;margin:10px 0}
 .legend span::before{content:"";display:inline-block;width:9px;height:9px;margin-right:5px;vertical-align:-1px;background:var(--c)}
+.upcoming .row{grid-template-columns:96px 1fr}
 
-/* Lists, cards, forms */
+/* Food, shop, lists */
 .card{background:var(--panel);padding:12px 14px;margin:0 0 8px}
-.card h4{margin:0;font-weight:400;font-size:18px}
+.card h4{margin:0;font-weight:300;font-size:22px}
 .card .jp{color:var(--dim);font-size:12px}
 .card ul{margin:6px 0 0;padding-left:18px;font-size:14px}
 .card p{margin:6px 0 0;font-size:14px}
-.card .uses{margin-top:8px;font-size:12px;color:var(--lime)}
-.meal-day{border-left:4px solid var(--orange);background:var(--panel);padding:10px 12px;margin:0 0 8px}
-.meal-day h4{margin:0 0 4px;font-weight:400;font-size:17px}
+.card .uses{margin-top:8px;font-size:12px;color:var(--accent)}
+.meal-day{padding:8px 0 10px;border-bottom:1px solid var(--line)}
+.meal-day h4{margin:0 0 4px;font-weight:300;font-size:22px}
 .meal-day div{font-size:14px;color:#ddd}
 .meal-day small{color:var(--dim)}
-.steps li{margin:0 0 8px}
-.steps{padding-left:0;list-style:none}
-.steps li{display:grid;grid-template-columns:78px 1fr;gap:10px;background:var(--panel);padding:10px 12px}
-.steps .t{color:var(--amber);font-variant-numeric:tabular-nums}
-.check{display:flex;gap:10px;align-items:flex-start;padding:10px 4px;border-bottom:1px solid var(--line);cursor:pointer}
-.check input{width:20px;height:20px;margin-top:2px;accent-color:var(--lime);flex:none}
+.steps{padding-left:0;list-style:none;margin:0}
+.steps li{display:grid;grid-template-columns:78px 1fr;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.steps .t{color:var(--accent);font-variant-numeric:tabular-nums}
+.check{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.check input{width:20px;height:20px;margin-top:2px;accent-color:var(--accent);flex:none}
 .check span{min-width:0}
 .check small{display:block;color:var(--dim);font-size:13px}
 .check:has(input:checked) span{text-decoration:line-through;color:var(--dim)}
-.check .x{margin-left:auto;background:none;border:0;color:var(--dim);cursor:pointer;font-size:18px}
-.store-head{display:flex;justify-content:space-between;align-items:baseline;margin:20px 0 4px}
-.store-head h3{margin:0;font-weight:300;font-size:22px}
-.store-head small{color:var(--dim)}
-.inline-add{display:flex;gap:6px;margin:6px 0 0}
+.check .x{margin-left:auto;background:none;border:0;color:var(--dim);cursor:pointer;font-size:20px}
+.store-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin:22px 0 2px}
+.store-head h3{margin:0;font-weight:300;font-size:24px}
+.store-head small{color:var(--dim);white-space:nowrap}
+.inline-add{display:flex;gap:6px;margin:8px 0 0}
 .inline-add input{flex:1;min-width:0}
 form.f{display:grid;gap:12px}
 .f label{display:grid;gap:4px;font-size:13px;color:var(--dim)}
-.f input[type=text],.f input[type=time],.f input[type=date],.f input[type=number],.f select,.f textarea,.inline-add input{background:#111;border:2px solid #555;padding:8px 10px;color:var(--fg);width:100%;border-radius:0}
-.f input:focus,.f select:focus,.f textarea:focus,.inline-add input:focus{outline:none;border-color:var(--fg)}
+.f input[type=text],.f input[type=time],.f input[type=date],.f input[type=number],.f select,.inline-add input{background:#fff;border:2px solid #fff;padding:7px 9px;color:#000;width:100%;border-radius:0}
+.f input:focus,.f select:focus,.inline-add input:focus{outline:none;border-color:var(--accent)}
 .f .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .f .days{display:flex;gap:4px;flex-wrap:wrap}
-.f .days label{display:flex;align-items:center;gap:4px;background:#111;border:2px solid #555;padding:4px 8px;color:var(--fg);font-size:14px}
-.f .seg{display:flex;gap:6px;flex-wrap:wrap}
-.f .seg label{display:flex;align-items:center;gap:6px;color:var(--fg);font-size:14px}
+.f .days label{display:flex;align-items:center;gap:4px;border:2px solid #555;padding:4px 8px;color:var(--fg);font-size:14px}
+.seg{display:flex;gap:6px 14px;flex-wrap:wrap}
+.seg label{display:flex;align-items:center;gap:6px;color:var(--fg);font-size:15px}
+.seg input{accent-color:var(--accent);width:18px;height:18px}
 .note{color:var(--dim);font-size:13px;margin:6px 0}
-.item{display:flex;gap:10px;align-items:flex-start;background:var(--panel);padding:10px 12px;margin:0 0 8px;border-left:4px solid var(--lime)}
-.item .b{min-width:0;flex:1}
-.item b{font-weight:400;font-size:16px;display:block}
+.item{display:flex;gap:8px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.item .b{min-width:0;flex:1 1 180px}
+.item b{font-weight:400;font-size:18px;display:block}
 .item small{color:var(--dim);display:block}
-.empty{color:var(--dim);background:var(--panel);padding:16px;margin:0 0 8px}
-.trip{background:var(--panel);padding:10px 12px;margin:0 0 8px;border-left:4px solid var(--amber)}
-.set-grid{display:grid;gap:10px}
+.empty{color:var(--dim);padding:12px 0}
 .dayset{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
-.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:#000;padding:8px 16px;font-size:14px;z-index:20}
-.sheet{background:var(--panel);padding:14px;margin:0 0 14px}
-.sheet .row-btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
-textarea.io{min-height:110px;font-size:12px;font-family:monospace}
-@media (prefers-reduced-motion:reduce){.tile:active{transform:none}}
+.swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:6px}
+.swatch{aspect-ratio:1/1;border:0;cursor:pointer;position:relative}
+.swatch[aria-pressed="true"]::after{content:"";position:absolute;inset:6px;border:3px solid #fff}
+.picrow{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.picrow .thumb{width:56px;height:56px;background:var(--panel) center/cover;flex:none}
+.picrow b{font-weight:400;flex:1;min-width:100px}
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:6px}
+.gallery .ph{position:relative;aspect-ratio:1/1;background:var(--panel) center/cover}
+.gallery .ph button{position:absolute;right:4px;top:4px;width:30px;height:30px;border-radius:50%;border:2px solid #fff;background:rgba(0,0,0,.5);cursor:pointer}
+.applist button{display:flex;align-items:center;gap:14px;width:100%;background:none;border:0;padding:8px 0;cursor:pointer;font-size:22px;font-weight:300;text-align:left;color:var(--fg)}
+.applist .sq{width:46px;height:46px;background:var(--accent);display:flex;align-items:center;justify-content:center;flex:none}
+.applist .sq svg{width:26px;height:26px}
+.toast{position:fixed;left:0;right:0;top:0;background:var(--accent);color:#fff;padding:calc(10px + env(safe-area-inset-top,0px)) 16px 10px;font-size:14px;z-index:30;animation:drop .25s ease-out}
+@keyframes drop{from{transform:translateY(-100%)}to{transform:none}}
+
+/* App bar */
+.appbar{position:fixed;left:0;right:0;bottom:0;background:var(--bar);padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));display:flex;justify-content:center;gap:22px;z-index:10}
+.appbar[hidden]{display:none}
+.appbar button{background:none;border:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--fg);font-size:11px;min-width:56px}
+.appbar .circ{width:40px;height:40px;border:2px solid var(--fg);border-radius:50%;display:flex;align-items:center;justify-content:center}
+.appbar .circ svg{width:20px;height:20px}
+.appbar button:active .circ{background:var(--fg)}
+.appbar button:active .circ svg{stroke:#000}
 </style>
 </head>
 <body>
 
 <div class="wrap">
-
   <section class="view" id="v-home">
-    <div class="home-head"><h1>bento<br>week</h1><div class="clock" id="clock"></div></div>
     <div class="tiles" id="tiles"></div>
+    <button class="allapps" type="button" id="to-apps" aria-label="All sections"></button>
+  </section>
+
+  <section class="view" id="v-apps" hidden>
+    <div class="apptitle">BENTO WEEK</div>
+    <h2 class="pagehead">all sections</h2>
+    <div class="applist" id="applist"></div>
   </section>
 
   <section class="view" id="v-day" hidden>
-    <div class="page-head"><button class="back" type="button" aria-label="Back">&#8592;</button><h2 id="day-title">today</h2></div>
+    <div class="apptitle">BENTO WEEK</div><div class="pivots" data-group="plan"></div>
     <p class="sub" id="day-sub"></p>
     <div class="day-meta" id="day-meta"></div>
-    <div class="actions" id="day-actions"></div>
     <div id="late-sheet"></div>
-    <div class="rows" id="day-rows"></div>
+    <div id="day-rows"></div>
   </section>
 
   <section class="view" id="v-cal" hidden>
-    <div class="page-head"><button class="back" type="button" aria-label="Back">&#8592;</button><h2>calendar</h2></div>
-    <div class="cal-nav"><button class="btn" type="button" id="cal-prev" aria-label="Previous month">&#8592;</button><b id="cal-month"></b><button class="btn" type="button" id="cal-next" aria-label="Next month">&#8594;</button></div>
+    <div class="apptitle">BENTO WEEK</div><div class="pivots" data-group="plan"></div>
+    <div class="cal-title" id="cal-month"></div>
     <div class="cal" id="cal"></div>
     <div class="legend">
-      <span style="--c:var(--cobalt)">work</span><span style="--c:var(--purple)">game day</span><span style="--c:var(--teal)">laundry</span>
-      <span style="--c:var(--steel)">dishwasher</span><span style="--c:var(--amber)">trip</span><span style="--c:var(--orange)">meal prep</span><span style="--c:var(--lime)">my items</span>
+      <span style="--c:#1ba1e2">work</span><span style="--c:#aa00ff">game day</span><span style="--c:#00aba9">laundry</span>
+      <span style="--c:#647687">dishwasher</span><span style="--c:#f0a30a">trip</span><span style="--c:#fa6800">meal prep</span><span style="--c:#a4c400">my items</span>
     </div>
-    <p class="note">Tap a day to see its full plan.</p>
-  </section>
-
-  <section class="view" id="v-meals" hidden>
-    <div class="page-head"><button class="back" type="button" aria-label="Back">&#8592;</button><h2>meals</h2></div>
-    <p class="sub" id="meals-sub"></p>
-    <div class="pills" id="meal-weeks"></div>
-    <div id="meal-days"></div>
-  </section>
-
-  <section class="view" id="v-prep" hidden>
-    <div class="page-head"><button class="back" type="button" aria-label="Back">&#8592;</button><h2>prep</h2></div>
-    <p class="sub" id="prep-sub"></p>
-    <div class="pills" id="prep-weeks"></div>
-    <ol class="steps" id="prep-steps"></ol>
-    <p class="note">Cooked meat and salmon keep 3–4 days in the fridge, so Monday's cooking lasts through Thursday. Onigiri firm up when cold; 20–30 seconds in the microwave fixes it.</p>
-  </section>
-
-  <section class="view" id="v-recipes" hidden>
-    <div class="page-head"><button class="back" type="button" aria-label="Back">&#8592;</button><h2>recipes</h2></div>
-    <p class="sub">Every recipe in the rotation, built on your microwave rice bowls.</p>
-    <div id="recipe-list"></div>
-  </section>
-
-  <section class="view" id="v-shop" hidden>
-    <div class="page-head"><button class="back" type="button" aria-label="Back">&#8592;</button><h2>shopping</h2></div>
-    <p class="sub">Checkmarks stay on this device. Add your own items under any store.</p>
-    <div id="stores"></div>
-    <div class="actions"><button class="btn warn" type="button" id="shop-reset">Clear all checkmarks</button></div>
+    <div class="sec">coming up</div>
+    <div class="upcoming" id="upcoming"></div>
   </section>
 
   <section class="view" id="v-mine" hidden>
-    <div class="page-head"><button class="back" type="button" aria-label="Back">&#8592;</button><h2>my items</h2></div>
+    <div class="apptitle">BENTO WEEK</div><div class="pivots" data-group="plan"></div>
     <p class="sub">Your own reminders. They show in the day plan and the calendar, and alert like everything else.</p>
     <form class="f sheet" id="mine-form" autocomplete="off">
       <input type="hidden" id="mf-id">
@@ -225,9 +237,42 @@ textarea.io{min-height:110px;font-size:12px;font-family:monospace}
     <div id="mine-list"></div>
   </section>
 
+  <section class="view" id="v-meals" hidden>
+    <div class="apptitle">BENTO WEEK</div><div class="pivots" data-group="food"></div>
+    <p class="sub" id="meals-sub"></p>
+    <div class="pills" id="meal-weeks"></div>
+    <div id="meal-days"></div>
+  </section>
+
+  <section class="view" id="v-prep" hidden>
+    <div class="apptitle">BENTO WEEK</div><div class="pivots" data-group="food"></div>
+    <p class="sub" id="prep-sub"></p>
+    <div class="pills" id="prep-weeks"></div>
+    <ol class="steps" id="prep-steps"></ol>
+    <p class="note">Cooked meat and salmon keep 3–4 days in the fridge, so Monday's cooking lasts through Thursday. Onigiri firm up when cold; 20–30 seconds in the microwave fixes it.</p>
+  </section>
+
+  <section class="view" id="v-recipes" hidden>
+    <div class="apptitle">BENTO WEEK</div><div class="pivots" data-group="food"></div>
+    <p class="sub">Every recipe in the rotation, built on your microwave rice bowls.</p>
+    <div id="recipe-list"></div>
+  </section>
+
+  <section class="view" id="v-shop" hidden>
+    <div class="apptitle">BENTO WEEK</div><div class="pivots" data-group="food"></div>
+    <p class="sub">Checkmarks stay on this device. Add your own items under any store.</p>
+    <div id="stores"></div>
+  </section>
+
+  <section class="view" id="v-photos" hidden>
+    <div class="apptitle">BENTO WEEK</div>
+    <h2 class="pagehead">photos</h2>
+    <p class="sub">Pictures for the photos tile. It cycles through them on Start.</p>
+    <div class="gallery" id="gallery"></div>
+  </section>
+
   <section class="view" id="v-settings" hidden>
-    <div class="page-head"><button class="back" type="button" aria-label="Back">&#8592;</button><h2>settings</h2></div>
-    <p class="sub">Changes save right away and update every alert. Settings are separate on your phone and tablet; copy them across at the bottom.</p>
+    <div class="apptitle">BENTO WEEK</div><div class="pivots" data-group="settings"></div>
     <form class="f" id="set-form" autocomplete="off">
       <div class="sec">sleep</div>
       <div class="two">
@@ -269,12 +314,26 @@ textarea.io{min-height:110px;font-size:12px;font-family:monospace}
       <div class="actions" style="margin:0"><button class="btn solid" type="submit" id="tf-save">Add trip</button><button class="btn" type="button" id="tf-cancel" hidden>Cancel edit</button></div>
     </form>
     <div class="sec">copy to another device</div>
-    <p class="note">Copy this text on one device and paste it into the box on the other, then tap Load. It carries settings, trips and your items.</p>
-    <textarea class="io" id="io" aria-label="Setup text"></textarea>
+    <p class="note">Copy this on one device and paste it into the box on the other, then tap Load. It carries settings, trips and your items. Pictures stay on each device.</p>
+    <textarea class="io" id="io" aria-label="Setup text" style="width:100%;min-height:90px;background:#fff;color:#000;border:0;font:12px monospace"></textarea>
     <div class="actions"><button class="btn" type="button" id="io-copy">Copy my setup</button><button class="btn" type="button" id="io-load">Load pasted setup</button><button class="btn warn" type="button" id="io-reset">Reset settings</button></div>
   </section>
 
+  <section class="view" id="v-look" hidden>
+    <div class="apptitle">BENTO WEEK</div><div class="pivots" data-group="settings"></div>
+    <div class="sec">accent color</div>
+    <div class="swatches" id="swatches"></div>
+    <div class="seg" style="margin-top:12px"><label><input type="checkbox" id="l-mixed"> Mixed tile colors instead of one accent</label></div>
+    <div class="sec">start background</div>
+    <p class="note">A photo that shows through the tiles, like Windows Phone 8.1.</p>
+    <div class="picrow" id="bgrow"></div>
+    <div class="sec">tile pictures</div>
+    <p class="note">Each of these tiles flips over to show your picture.</p>
+    <div id="tilepics"></div>
+    <input type="file" id="picker" accept="image/*" hidden>
+  </section>
 </div>
+<nav class="appbar" id="appbar" hidden></nav>
 
 <script>
 /* ---------- Plan data (meal rotation, recipes, stores) ---------- */
@@ -394,15 +453,6 @@ const STORES = [
 ];
 
 /* ---------- Helpers ---------- */
-const svg = p=>`<svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
-const ICON = {
-  wash: svg('<rect x="4" y="3" width="16" height="18"/><circle cx="12" cy="13" r="5"/><path d="M7 6h2"/>'),
-  dish: svg('<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/>'),
-  none: svg('<path d="M6 12h12"/>'),
-  knife: svg('<path d="M4 20 18 6c1.5-1.5 3 0 1.5 1.5L9 18"/><path d="M4 20l3-1"/>'),
-  onigiri: svg('<path d="M12 3 21 19H3z"/><path d="M8.5 13h7v6h-7z"/>'),
-  gear: svg('<circle cx="12" cy="12" r="3.2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/>')
-};
 
 const NAMES = ["Breakfast","Lunch","Dinner","Late snack"];
 const DAYNAMES = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
@@ -609,113 +659,273 @@ function scheduleApp(){
   try{ window.BentoApp.setSchedule(JSON.stringify(out)); }catch(e){}
 }
 
+
+
+/* ---------- Icons and pictures ---------- */
+const I = (p,sw=1.6)=>`<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
+const ICON = {
+  arrow: I('<path d="M5 12h14M13 6l6 6-6 6"/>'),
+  left: I('<path d="M19 12H5M11 6l-6 6 6 6"/>'),
+  right: I('<path d="M5 12h14M13 6l6 6-6 6"/>'),
+  plus: I('<path d="M12 5v14M5 12h14"/>'),
+  clock: I('<circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3.5 2"/>'),
+  today: I('<rect x="4" y="5" width="16" height="15"/><path d="M4 9.5h16M8 3v4M16 3v4M9 14l2 2 4-4"/>'),
+  cal: I('<rect x="4" y="5" width="16" height="15"/><path d="M4 9.5h16M8 3v4M16 3v4"/><path d="M8 13h2M12 13h2M16 13h0M8 16.5h2M12 16.5h2"/>'),
+  wash: I('<rect x="4.5" y="3" width="15" height="18"/><circle cx="12" cy="13" r="4.5"/><path d="M7.5 6h2"/>'),
+  dish: I('<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/>'),
+  none: I('<path d="M7 12h10"/>'),
+  knife: I('<path d="M4 20 18 6c1.5-1.5 3 0 1.5 1.5L9 18"/><path d="M4 20l3-1"/>'),
+  onigiri: I('<path d="M12 3.5 20.5 19h-17z"/><path d="M8.6 13.5h6.8V19H8.6z"/>'),
+  gear: I('<circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/>'),
+  cart: I('<path d="M3 4h2.5l2.2 10.5h10.6L20.5 7H7"/><circle cx="9.5" cy="19" r="1.4"/><circle cx="17" cy="19" r="1.4"/>'),
+  bowl: I('<path d="M3.5 11h17a8.5 8.5 0 0 1-17 0z"/><path d="M8 7.5c0-1.5 1.5-1.5 1.5-3M12 7.5c0-1.5 1.5-1.5 1.5-3"/>'),
+  photo: I('<rect x="3.5" y="5" width="17" height="14"/><circle cx="9" cy="10" r="1.6"/><path d="M4 17l5-4.5 3.5 3 3-2.5 4.5 4"/>'),
+  dog: I('<path d="M6 9 4 5l4 2h8l4-2-2 4"/><path d="M6 9c0 6 2.5 10 6 10s6-4 6-10"/><circle cx="9.5" cy="12" r=".6"/><circle cx="14.5" cy="12" r=".6"/><path d="M11 15.5h2l-1 1z"/>'),
+  palette: I('<path d="M12 3.5a8.5 8.5 0 1 0 0 17c1.2 0 1.6-.9 1.3-1.8-.4-1 .3-2.2 1.5-2.2H17a3.5 3.5 0 0 0 3.5-3.5c0-5-3.8-9.5-8.5-9.5z"/><circle cx="8" cy="11" r="1"/><circle cx="11" cy="7.5" r="1"/><circle cx="15.5" cy="8.5" r="1"/>'),
+  trash: I('<path d="M5 7h14M10 7V4.5h4V7M7 7l1 13h8l1-13"/>'),
+  check: I('<path d="M5 12.5l4.5 4.5L19 7.5"/>'),
+  x: I('<path d="M6 6l12 12M18 6 6 18"/>')
+};
+// Flat illustrations for the picture faces of tiles.
+const ART = {
+  bento: `<svg viewBox="0 0 200 200" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="200" height="200" fill="#3b1d14"/>
+    <rect x="18" y="30" width="164" height="140" rx="10" fill="#7a1f2b"/><rect x="28" y="40" width="144" height="120" rx="4" fill="#161616"/>
+    <rect x="32" y="44" width="66" height="112" fill="#f6f2e8"/><circle cx="50" cy="70" r="1.8" fill="#222"/><circle cx="62" cy="84" r="1.8" fill="#222"/><circle cx="76" cy="66" r="1.8" fill="#222"/><circle cx="58" cy="118" r="1.8" fill="#222"/><circle cx="82" cy="132" r="1.8" fill="#222"/>
+    <circle cx="66" cy="100" r="11" fill="#c2213f"/><circle cx="62" cy="96" r="3" fill="#e7586f"/>
+    <rect x="102" y="44" width="66" height="54" fill="#1f1f1f"/><path d="M106 52h56l-6 40h-48z" fill="#f08a5d"/><path d="M114 58l36 2M112 70l40 2M110 82l40 2" stroke="#fbd2bd" stroke-width="3"/>
+    <rect x="102" y="102" width="66" height="54" fill="#1f1f1f"/><rect x="106" y="108" width="26" height="20" rx="3" fill="#f5c542"/><rect x="134" y="108" width="26" height="20" rx="3" fill="#f5c542"/><path d="M110 118h18M138 118h18" stroke="#e0a91f" stroke-width="2"/>
+    <circle cx="116" cy="142" r="9" fill="#3d8b37"/><circle cx="130" cy="138" r="9" fill="#4ea845"/><circle cx="146" cy="143" r="9" fill="#3d8b37"/><circle cx="158" cy="137" r="7" fill="#4ea845"/></svg>`,
+  bag: `<svg viewBox="0 0 200 200" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="200" height="200" fill="#0f5f5e"/>
+    <path d="M70 40c4-14 12-24 20-26M88 44c2-18 6-28 14-34M104 46c4-16 2-30 8-38" stroke="#4ea845" stroke-width="8" stroke-linecap="round" fill="none"/>
+    <rect x="118" y="34" width="22" height="58" rx="4" fill="#3a2414"/><rect x="122" y="22" width="14" height="16" rx="3" fill="#c2213f"/><rect x="121" y="54" width="16" height="22" fill="#f6f2e8"/>
+    <path d="M44 70h112l-10 108H54z" fill="#c69a64"/><path d="M44 70h112l-3 14H47z" fill="#a87d4b"/><path d="M78 104h44" stroke="#8a6338" stroke-width="4"/><circle cx="100" cy="132" r="16" fill="none" stroke="#8a6338" stroke-width="4"/></svg>`,
+  onigiri: `<svg viewBox="0 0 200 200" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="200" height="200" fill="#4b1d6e"/>
+    <path d="M100 30c10 0 18 8 26 22l40 72c10 18 2 40-24 40H58c-26 0-34-22-24-40l40-72c8-14 16-22 26-22z" fill="#f6f2e8"/>
+    <rect x="72" y="118" width="56" height="46" fill="#1c2a1c"/><circle cx="84" cy="96" r="4" fill="#222"/><circle cx="116" cy="96" r="4" fill="#222"/><path d="M94 106q6 5 12 0" stroke="#222" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="76" cy="106" r="5" fill="#f4a7b1"/><circle cx="124" cy="106" r="5" fill="#f4a7b1"/></svg>`,
+  photos: `<svg viewBox="0 0 200 200" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="200" height="200" fill="#1e4f87"/><circle cx="150" cy="56" r="20" fill="#f5c542"/>
+    <path d="M0 150 60 84l40 40 30-28 70 64v40H0z" fill="#16324f"/><path d="M0 170 50 130l40 26 40-20 70 40v24H0z" fill="#0e2034"/></svg>`,
+  dog: `<svg viewBox="0 0 200 200" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="200" height="200" fill="#8a5a12"/>
+    <path d="M50 60 36 120l30-10zM150 60l14 60-30-10z" fill="#5a3a0c"/><ellipse cx="100" cy="110" rx="50" ry="56" fill="#e2b06b"/><ellipse cx="100" cy="138" rx="26" ry="20" fill="#f3d6a8"/>
+    <circle cx="80" cy="102" r="7" fill="#222"/><circle cx="120" cy="102" r="7" fill="#222"/><ellipse cx="100" cy="126" rx="10" ry="7" fill="#222"/><path d="M100 133v8M92 146q8 6 16 0" stroke="#222" stroke-width="3" fill="none" stroke-linecap="round"/></svg>`
+};
+const ACCENTS = ["#a4c400","#60a917","#008a00","#00aba9","#1ba1e2","#0050ef","#6a00ff","#aa00ff","#f472d0","#d80073","#a20025","#e51400","#fa6800","#f0a30a","#e3c800","#825a2c","#6d8764","#647687","#76608a","#87794e"];
+const MIXED = {today:"#0050ef",cal:"#d80073",meals:"#fa6800",photos:"#1ba1e2",shop:"#00aba9",late:"#e51400",mine:"#60a917",machine:"#647687",prep:"#825a2c",recipes:"#6a00ff",settings:"#008a00",dogs:"#f0a30a"};
+if(!CFG.accent) CFG.accent = "#1ba1e2";
+
+/* ---------- Pictures stored on this device ---------- */
+const PIC_TILES = [["today","Today"],["cal","Calendar"],["meals","Meals"],["shop","Shopping"]];
+function getPic(k){ try{ return localStorage.getItem("bw-pic-"+k)||""; }catch(e){ return ""; } }
+function setPic(k,v){ try{ v ? localStorage.setItem("bw-pic-"+k,v) : localStorage.removeItem("bw-pic-"+k); return true; }catch(e){ toast("Not enough room for that picture. Remove one first."); return false; } }
+function photoIds(){ return load("bw-photo-ids",[]); }
+function shrink(file,max){
+  return new Promise((ok,bad)=>{
+    const r = new FileReader();
+    r.onerror = ()=>bad(); r.onload = ()=>{ const img = new Image(); img.onerror = ()=>bad(); img.onload = ()=>{
+      const s = Math.min(1,max/Math.max(img.width,img.height)), c = document.createElement("canvas");
+      c.width = Math.round(img.width*s); c.height = Math.round(img.height*s);
+      c.getContext("2d").drawImage(img,0,0,c.width,c.height); ok(c.toDataURL("image/jpeg",.8)); }; img.src = r.result; };
+    r.readAsDataURL(file);
+  });
+}
+let PICK = null;
+function pickPicture(target){ PICK = target; const p = $("picker"); p.value = ""; p.click(); }
+
 /* ---------- Navigation ---------- */
-let VIEW = "home", DAY = dayOnly(new Date()), CALM = new Date(DAY.getFullYear(),DAY.getMonth(),1), MEALW = null, PREPW = null;
-function show(view,push=true){
-  VIEW = view;
-  document.querySelectorAll(".view").forEach(v=>v.hidden = v.id!=="v-"+view);
+const $ = id=>document.getElementById(id);
+const GROUPS = {plan:[["day","today"],["cal","calendar"],["mine","my items"]],food:[["meals","meals"],["prep","prep"],["recipes","recipes"],["shop","shopping"]],settings:[["settings","settings"],["look","look"]]};
+let VIEW = "home", DAY = dayOnly(new Date()), CALM = new Date(DAY.getFullYear(),DAY.getMonth(),1), MEALW = null, PREPW = null, LATE_OPEN = false;
+function groupOf(v){ return Object.keys(GROUPS).find(g=>GROUPS[g].some(x=>x[0]===v)); }
+function show(view,push=true,animate=true){
+  const same = VIEW===view; VIEW = view;
+  document.querySelectorAll(".view").forEach(v=>{ v.hidden = v.id!=="v-"+view; });
+  const el = $("v-"+view); if(el && animate && !same){ el.classList.remove("enter"); void el.offsetWidth; el.classList.add("enter"); }
   render();
   if(push){ try{ history.pushState({view,day:ymd(DAY)},""); }catch(e){} }
   try{ localStorage.setItem("bw-view",JSON.stringify({view,day:ymd(DAY),at:Date.now()})); }catch(e){}
-  window.scrollTo(0,0);
+  if(!same) window.scrollTo(0,0);
+}
+function swapPivot(view){ // pivots in a group replace each other instead of stacking history
+  try{ history.replaceState({view,day:ymd(DAY)},""); }catch(e){} show(view,false);
 }
 window.addEventListener("popstate",e=>{ const s = e.state||{view:"home"}; if(s.day) DAY = parseYmd(s.day); show(s.view||"home",false); });
-document.addEventListener("click",e=>{
-  if(e.target.closest(".back")){ history.length>1 ? history.back() : show("home"); }
-});
-function toast(msg){ const t = document.createElement("div"); t.className="toast"; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),1800); }
-function afterChange(){ scheduleApp(); render(); }
+function toast(msg){ document.querySelectorAll(".toast").forEach(t=>t.remove()); const t = document.createElement("div"); t.className="toast"; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),2000); }
+function afterChange(){ applyAccent(); scheduleApp(); render(); }
+function applyAccent(){ document.documentElement.style.setProperty("--accent",CFG.accent||"#1ba1e2"); }
 
-/* ---------- Home tiles ---------- */
-function sizeTiles(){
-  const g = document.getElementById("tiles"), cols = getComputedStyle(g).gridTemplateColumns.split(" ").length || 4;
-  const w = g.clientWidth || (Math.min(window.innerWidth,900)-32);
-  g.style.gridAutoRows = Math.floor((w-8*(cols-1))/cols)+"px";
+function renderPivots(){
+  document.querySelectorAll(".pivots").forEach(p=>{
+    const g = GROUPS[p.dataset.group], i = g.findIndex(x=>x[0]===VIEW);
+    const order = i<0 ? g : g.slice(i).concat(g.slice(0,i));
+    p.innerHTML = order.map(([v,n])=>`<button type="button" data-pivot="${v}" aria-current="${v===VIEW}">${n}</button>`).join("");
+  });
 }
-window.addEventListener("resize",()=>{ if(VIEW==="home") sizeTiles(); });
-function nextItem(){
-  const now = new Date(), nm = now.getHours()*60+now.getMinutes();
-  for(let n=0;n<3;n++){ const d = addDays(now,n); const it = dayItems(d).find(r=>n>0||r.t>nm); if(it) return {it,d,n}; }
-  return null;
+document.addEventListener("click",e=>{ const b = e.target.closest("[data-pivot]"); if(b && b.dataset.pivot!==VIEW) swapPivot(b.dataset.pivot); });
+// Swipe between pivots
+let SX = null, SY = null;
+document.addEventListener("touchstart",e=>{ if(e.touches.length!==1) return; SX = e.touches[0].clientX; SY = e.touches[0].clientY; },{passive:true});
+document.addEventListener("touchend",e=>{
+  if(SX===null) return; const dx = e.changedTouches[0].clientX-SX, dy = e.changedTouches[0].clientY-SY; SX = null;
+  if(Math.abs(dx)<70 || Math.abs(dy)>Math.abs(dx)*.6) return;
+  if(e.target.closest("input,select,textarea,.cal")) return;
+  const g = groupOf(VIEW); if(!g) return; const list = GROUPS[g], i = list.findIndex(x=>x[0]===VIEW);
+  swapPivot(list[(i+(dx<0?1:list.length-1))%list.length][0]);
+},{passive:true});
+
+/* ---------- App bar ---------- */
+const AB = (id,icon,label)=>`<button type="button" data-ab="${id}"><span class="circ">${ICON[icon]}</span>${label}</button>`;
+function renderAppbar(){
+  const bar = $("appbar"), isToday = ymd(DAY)===ymd(dayOnly(new Date()));
+  const sets = {
+    day: AB("prev","left","previous")+(isToday?AB("late","clock","late"):AB("today","today","today"))+AB("add","plus","add")+AB("next","right","next"),
+    cal: AB("mprev","left","previous")+AB("mtoday","today","today")+AB("add","plus","add")+AB("mnext","right","next"),
+    mine: AB("newitem","plus","new"),
+    shop: AB("shopclear","check","clear all"),
+    photos: AB("addphoto","plus","add photo"),
+    meals: AB("prepgo","knife","prep")+AB("shopgo","cart","shopping"),
+    look: AB("homego","arrow","start")
+  };
+  const html = sets[VIEW]||"";
+  bar.innerHTML = html; bar.hidden = !html;
 }
+$("appbar").addEventListener("click",e=>{
+  const b = e.target.closest("[data-ab]"); if(!b) return;
+  switch(b.dataset.ab){
+    case "prev": DAY = addDays(DAY,-1); LATE_OPEN=false; render(); break;
+    case "next": DAY = addDays(DAY,1); LATE_OPEN=false; render(); break;
+    case "today": DAY = dayOnly(new Date()); render(); break;
+    case "late": LATE_OPEN = !LATE_OPEN; render(); if(LATE_OPEN) window.scrollTo(0,0); break;
+    case "add": startItem({date:ymd(VIEW==="cal"?dayOnly(new Date()):DAY)}); swapPivot("mine"); break;
+    case "mprev": CALM = new Date(CALM.getFullYear(),CALM.getMonth()-1,1); render(); break;
+    case "mnext": CALM = new Date(CALM.getFullYear(),CALM.getMonth()+1,1); render(); break;
+    case "mtoday": CALM = new Date(new Date().getFullYear(),new Date().getMonth(),1); render(); break;
+    case "newitem": startItem({}); window.scrollTo(0,0); $("mf-title").focus(); break;
+    case "shopclear": CHECKS = {}; store("bento-checks",CHECKS); Object.values(SHOPX).forEach(a=>a.forEach(x=>x.done=false)); store("bw-shop-extra",SHOPX); render(); toast("Checkmarks cleared"); break;
+    case "addphoto": pickPicture("album"); break;
+    case "prepgo": swapPivot("prep"); break;
+    case "shopgo": swapPivot("shop"); break;
+    case "homego": show("home"); break;
+  }
+});
+
+/* ---------- Start screen ---------- */
+function nextItems(n){
+  const now = new Date(), nm = now.getHours()*60+now.getMinutes(), out = [];
+  for(let d=0; d<3 && out.length<n; d++){ const date = addDays(now,d); dayItems(date).forEach(r=>{ if((d>0||r.t>nm) && r.cat!=="peak" && out.length<n) out.push({...r,d,date}); }); }
+  return out;
+}
+function tileColor(k){ return CFG.mixed ? MIXED[k] : ""; }
+function face(html,cls=""){ return `<div class="face ${cls}">${html}</div>`; }
+function picFace(src,cap){ return `<div class="face pic" style="background-image:url('${src}')">${cap?`<div class="cap">${esc(cap)}</div>`:""}</div>`; }
+function artFace(name,cap){ return `<div class="face art">${ART[name]}${cap?`<div class="cap">${esc(cap)}</div>`:""}</div>`; }
 function renderHome(){
   const now = new Date(), today = dayOnly(now), items = dayItems(today), tt = tripFor(today);
   const doneMap = load("bw-done-"+ymd(today),{}), countable = items.filter(r=>r.cat!=="peak");
-  const done = countable.filter(r=>doneMap[r.title+"@"+r.t]).length;
-  const nx = nextItem();
-  document.getElementById("clock").innerHTML = `<b>${fmt(now.getHours()*60+now.getMinutes())}</b>${now.toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"})}`;
-  const label = tt ? (tt.type==="away"?"away: "+tt.trip.name.toLowerCase():tt.type==="depart"?"leaving today":"coming home") : KINDS[kindFor(today)].toLowerCase();
+  const done = countable.filter(r=>doneMap[r.title+"@"+r.t]).length, nx = nextItems(3), mach = machineFor(today);
+  const when = r=>r.d===0?fmt(r.t):r.d===1?"tmrw "+fmt(r.t):nice(r.date)+" "+fmt(r.t);
   const dinner = items.find(r=>r.title==="Dinner");
-  const unchecked = STORES.reduce((n,s)=>n+s.items.filter((_,k)=>!CHECKS[s.id+k]).length + (SHOPX[s.id]||[]).filter(x=>!x.done).length,0);
-  const mine = ITEMS.length, mach = machineFor(today);
+  const unchecked = [];
+  STORES.forEach(s=>{ s.items.forEach((it,k)=>{ if(!CHECKS[s.id+k]) unchecked.push(it[0]); }); (SHOPX[s.id]||[]).forEach(x=>{ if(!x.done) unchecked.push(x.t); }); });
+  const upcomingMine = (()=>{ for(let d=0; d<30; d++){ const date = addDays(today,d), m = mineFor(date); if(m.length) return {date,title:m[0][2],t:m[0][0]}; } return null; })();
+  const ids = photoIds(), photoSrc = ids.length ? (load("bw-photo-"+ids[Math.floor(Date.now()/60000)%ids.length],"")||"") : "";
   const late = LATE[ymd(today)];
-  const tiles = [
-    ["day","t42 c-cobalt",`<span class="name">today · ${esc(label)}</span>
-      <span><span class="mid">${nx?esc(nx.it.title):"Nothing left today"}</span><br><span class="small">${nx?(nx.n===0?"next at ":nx.n===1?"tomorrow at ":nice(nx.d)+" at ")+fmt(nx.it.t):""}</span></span>
-      <span class="small">${done} of ${countable.length} done</span>`],
-    ["cal","t22 c-magenta",`<span class="name">calendar</span><span class="big">${now.getDate()}</span><span class="small">${DAYNAMES[now.getDay()].toLowerCase()}</span>`],
-    ["meals","t22 c-orange",`<span class="name">meals</span><span class="small clip">tonight: ${esc(dinner?dinner.text:"—")}</span><span class="small">${bentoOn(today)?"week "+ROT[weekFor(today)].k:"bento starts "+nice(parseYmd(CFG.bentoStart)).toLowerCase()}</span>`],
-    ["late","t11 c-red",`<span class="name">late</span><span class="glyph">${late?"+"+late.add:"+15"}</span>`],
-    ["mine","t11 c-lime",`<span class="name">my items</span><span class="glyph">+</span>${mine?`<span class="count">${mine}</span>`:""}`],
-    ["shop","t22 c-teal",`<span class="name">shopping</span><span class="big">${unchecked}</span><span class="small">items left to buy</span>`],
-    ["machine","t11 c-steel",`<span class="name">${mach==="L"?"laundry":mach==="D"?"dishwasher":"machines"}</span><span class="glyph">${mach==="L"?ICON.wash:mach==="D"?ICON.dish:ICON.none}</span>`],
-    ["prep","t11 c-brown",`<span class="name">prep</span><span class="glyph">${ICON.knife}</span>`],
-    ["recipes","t11 c-purple",`<span class="name">recipes</span><span class="glyph">${ICON.onigiri}</span>`],
-    ["settings","t11 c-emerald",`<span class="name">settings</span><span class="glyph">${ICON.gear}</span>`]
-  ];
+  const kindName = tt ? (tt.type==="away"?"away":tt.type==="depart"?"leaving today":"coming home") : (KINDS[kindFor(today)]||"").toLowerCase();
+  const T = [];
+  // today (wide)
+  { const f = [face(`<div class="lead small">${esc(kindName)} · ${done} of ${countable.length} done</div><div style="flex:1"></div><div class="mid">${nx[0]?esc(nx[0].title):"All done for today"}</div><div class="small">${nx[0]?when(nx[0]):""}</div>`),
+      face(`<div class="lead">up next</div><div class="list3" style="margin-top:6px">${nx.map(r=>`<div><span>${when(r)}</span>${esc(r.title)}</div>`).join("")}</div>`)];
+    const p = getPic("today"); if(p) f.push(picFace(p,nx[0]?nx[0].title:""));
+    T.push({k:"today",go:"day",cls:"t42",faces:f,label:"today"}); }
+  // calendar
+  { const f = [face(`<div style="flex:1"></div><div class="big">${now.getDate()}</div><div class="small">${DAYNAMES[now.getDay()].toLowerCase()}</div>`)];
+    if(upcomingMine) f.push(face(`<div class="lead">${esc(upcomingMine.title)}</div><div class="small">${upcomingMine.date.getTime()===today.getTime()?"today":nice(upcomingMine.date)} · ${fmt(upcomingMine.t)}</div>`));
+    const p = getPic("cal"); if(p) f.push(picFace(p));
+    T.push({k:"cal",go:"cal",cls:"t22",faces:f,label:"calendar"}); }
+  // meals
+  { const p = getPic("meals"); const f = [p?picFace(p,dinner?"tonight: "+dinner.text:""):artFace("bento",""),face(`<div class="lead">tonight</div><div class="mid clip3" style="font-size:18px;margin-top:4px">${esc(dinner?dinner.text:"—")}</div><div style="flex:1"></div><div class="small">${bentoOn(today)?"week "+ROT[weekFor(today)].k:"bento starts "+nice(parseYmd(CFG.bentoStart)).toLowerCase()}</div>`)];
+    T.push({k:"meals",go:"meals",cls:"t22",faces:f,label:"meals"}); }
+  // small tiles row
+  T.push({k:"late",go:"late",cls:"t11",faces:[face(ICON.clock)],badge:late?"+"+late.add:""});
+  T.push({k:"mine",go:"mine",cls:"t11",faces:[face(ICON.plus)],badge:ITEMS.length||""});
+  T.push({k:"machine",go:"machine",cls:"t11",faces:[face(mach==="L"?ICON.wash:mach==="D"?ICON.dish:ICON.none)]});
+  T.push({k:"prep",go:"prep",cls:"t11",faces:[face(ICON.knife)]});
+  // shopping
+  { const p = getPic("shop"); const f = [face(`<div class="icon-c">${ICON.cart}</div>`),face(`<div class="lead">to buy</div><div class="list3" style="margin-top:4px">${unchecked.slice(0,4).map(x=>`<div>${esc(x)}</div>`).join("")||"<div>Nothing left</div>"}</div>`),p?picFace(p):artFace("bag")];
+    T.push({k:"shop",go:"shop",cls:"t22",faces:f,label:"shopping",badge:unchecked.length}); }
+  // photos
+  T.push({k:"photos",go:"photos",cls:"t22",faces:[photoSrc?picFace(photoSrc):artFace("photos","add your photos")],label:"photos"});
+  if(tt && tt.trip.dogs) T.push({k:"dogs",go:"day",cls:"t11",faces:[face(ICON.dog)]});
+  T.push({k:"recipes",go:"recipes",cls:"t11",faces:[face(ICON.onigiri)]});
+  T.push({k:"settings",go:"settings",cls:"t11",faces:[face(ICON.gear)]});
+  T.push({k:"look",go:"look",cls:"t11",faces:[face(ICON.palette)]});
+  const bg = getPic("startbg");
+  $("tiles").innerHTML = T.map(t=>`<button type="button" class="tile ${t.cls}${bg?" bgwin":""}" data-go="${t.go}" data-k="${t.k}" data-faces="${t.faces.length}" data-face="0" style="${!bg&&tileColor(t.k)?"background:"+tileColor(t.k):""}${bg?`;background-image:url('${bg}')`:""}" aria-label="${t.label||t.k}">${t.faces.join("")}${t.label&&t.cls!=="t11"?`<span class="label">${t.label}</span>`:""}${t.badge!==undefined&&t.badge!==""?`<span class="badge">${t.badge}</span>`:""}</button>`).join("");
+  $("to-apps").innerHTML = I('<path d="M12 5v14M6 13l6 6 6-6"/>');
   sizeTiles();
-  document.getElementById("tiles").innerHTML = tiles.map(([v,cls,html])=>`<button type="button" class="tile ${cls}" data-go="${v}">${html}</button>`).join("");
 }
-document.getElementById("tiles").addEventListener("click",e=>{
-  const b = e.target.closest("[data-go]"); if(!b) return;
-  const v = b.dataset.go;
+function sizeTiles(){
+  const g = $("tiles"); if(!g || VIEW!=="home") return;
+  const cols = getComputedStyle(g).gridTemplateColumns.split(" ").length || 4, w = g.clientWidth;
+  if(!w) return;
+  g.style.gridAutoRows = Math.floor((w-6*(cols-1))/cols)+"px";
+  const bg = getPic("startbg");
+  if(bg){ const gw = g.clientWidth, gh = g.scrollHeight; g.querySelectorAll(".tile").forEach(t=>{ t.style.backgroundSize = `${gw}px ${gh}px`; t.style.backgroundPosition = `${-t.offsetLeft}px ${-t.offsetTop}px`; }); }
+}
+window.addEventListener("resize",()=>{ if(VIEW==="home") requestAnimationFrame(sizeTiles); });
+// Live tiles: flip one tile at a time.
+setInterval(()=>{
+  if(VIEW!=="home" || document.hidden) return;
+  const live = [...document.querySelectorAll('.tile[data-faces]')].filter(t=>+t.dataset.faces>1); if(!live.length) return;
+  const t = live[Math.floor(Math.random()*live.length)]; t.dataset.face = (+t.dataset.face+1)%(+t.dataset.faces);
+},3200);
+// Tilt on press, like Windows Phone.
+$("tiles").addEventListener("pointerdown",e=>{ const t = e.target.closest(".tile"); if(!t) return; const r = t.getBoundingClientRect();
+  const x = (e.clientX-r.left)/r.width-.5, y = (e.clientY-r.top)/r.height-.5;
+  t.style.setProperty("--rx",(-y*14)+"deg"); t.style.setProperty("--ry",(x*14)+"deg"); t.style.setProperty("--s",".97"); });
+["pointerup","pointerleave","pointercancel"].forEach(ev=>$("tiles").addEventListener(ev,e=>{ const t = e.target.closest(".tile"); if(t){ t.style.removeProperty("--rx"); t.style.removeProperty("--ry"); t.style.removeProperty("--s"); } }));
+$("tiles").addEventListener("click",e=>{
+  const b = e.target.closest("[data-go]"); if(!b) return; const v = b.dataset.go;
   if(v==="day"){ DAY = dayOnly(new Date()); show("day"); }
   else if(v==="late"){ DAY = dayOnly(new Date()); LATE_OPEN = true; show("day"); }
   else if(v==="machine"){ const m = machineFor(new Date()); toast(m==="L"?"Laundry day: one load":m==="D"?"Dishwasher runs tonight":"No machines today"); }
   else show(v);
 });
+$("to-apps").addEventListener("click",()=>show("apps"));
 
-/* ---------- Day view ---------- */
-let LATE_OPEN = false;
+/* ---------- All sections ---------- */
+const APPS = [["cal","calendar","cal"],["look","look","palette"],["meals","meals","bowl"],["mine","my items","plus"],["photos","photos","photo"],["prep","prep","knife"],["recipes","recipes","onigiri"],["settings","settings","gear"],["shop","shopping","cart"],["day","today","today"]];
+function renderApps(){ $("applist").innerHTML = APPS.map(([v,n,ic])=>`<button type="button" data-app="${v}"><span class="sq">${ICON[ic]}</span>${n}</button>`).join(""); }
+$("applist").addEventListener("click",e=>{ const b = e.target.closest("[data-app]"); if(!b) return; if(b.dataset.app==="day") DAY = dayOnly(new Date()); show(b.dataset.app); });
+
+/* ---------- Day ---------- */
 function renderDay(){
   const d = DAY, today = dayOnly(new Date()), isToday = ymd(d)===ymd(today), items = dayItems(d), tt = tripFor(d);
   const {W,ramp} = sleepFor(d), mach = machineFor(d), late = LATE[ymd(d)];
   const lo = items.find(r=>r.title==="Lights out"), L = lo ? lo.t : sleepFor(d).L;
-  document.getElementById("day-title").textContent = isToday ? "today" : DAYNAMES[d.getDay()].toLowerCase();
   const kind = tt ? (tt.type==="away"?"Away: "+tt.trip.name:tt.type==="depart"?"Leaving for "+tt.trip.name:"Coming home from "+tt.trip.name) : KINDS[kindFor(d)];
-  document.getElementById("day-sub").textContent = `${d.toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"})} · ${kind}`;
-  document.getElementById("day-meta").innerHTML = `<span>Up <b>${fmt(W)}</b></span><span>Lights out <b>${fmt(L)}</b>${ramp?" (bedtime ramp)":""}</span><span>Machine <b>${mach==="L"?"laundry":mach==="D"?"dishwasher":"none"}</b></span><span>Meals <b>${tt&&tt.type!=="depart"?"on the go":bentoOn(d)?"Bento week "+ROT[weekFor(d)].k:"CookUnity"}</b></span>${late?`<span>Running late <b>+${late.add} min</b></span>`:""}`;
-  document.getElementById("day-actions").innerHTML =
-    `<button class="btn" type="button" data-shift="-1">&#8592; ${nice(addDays(d,-1))}</button>`+
-    (isToday?"":`<button class="btn" type="button" data-shift="0">Today</button>`)+
-    `<button class="btn" type="button" data-shift="1">${nice(addDays(d,1))} &#8594;</button>`+
-    (isToday?`<button class="btn" type="button" id="late-open">Running late</button>`:"")+
-    `<button class="btn" type="button" id="day-add">+ Add item</button>`;
-  document.getElementById("late-sheet").innerHTML = isToday && LATE_OPEN ? `<div class="sheet"><b>Push the rest of today back</b>
+  $("day-sub").innerHTML = `<span class="acc">${isToday?"Today":DAYNAMES[d.getDay()]}</span> · ${d.toLocaleDateString("en-US",{month:"long",day:"numeric"})} · ${esc(kind)}`;
+  $("day-meta").innerHTML = `<span>up <b>${fmt(W)}</b></span><span>lights out <b>${fmt(L)}</b>${ramp?" (ramp)":""}</span><span>machine <b>${mach==="L"?"laundry":mach==="D"?"dishwasher":"none"}</b></span><span>meals <b>${tt&&tt.type!=="depart"?"on the go":bentoOn(d)?"week "+ROT[weekFor(d)].k:"CookUnity"}</b></span>${late?`<span>late <b>+${late.add} min</b></span>`:""}`;
+  $("late-sheet").innerHTML = isToday && LATE_OPEN ? `<div class="sheet"><b style="font-weight:400;font-size:18px">Push the rest of today back</b>
     <p class="note">Moves every step from now on, except work hours, peak hours and bedtime.</p>
-    <div class="row-btns">${[15,30,60].map(n=>`<button class="btn solid" type="button" data-late="${n}">+${n} min</button>`).join("")}${late?`<button class="btn warn" type="button" data-late="0">Back on time</button>`:""}</div></div>` : "";
+    <div class="actions" style="margin-bottom:0">${[15,30,60].map(n=>`<button class="btn solid" type="button" data-late="${n}">+${n} min</button>`).join("")}${late?`<button class="btn warn" type="button" data-late="0">Back on time</button>`:""}</div></div>` : "";
   const nm = new Date().getHours()*60+new Date().getMinutes();
   let nowIdx = -1; if(isToday) items.forEach((r,k)=>{ if(r.t<=nm) nowIdx = k; });
   const doneMap = load("bw-done-"+ymd(d),{});
-  document.getElementById("day-rows").innerHTML = items.map((r,k)=>{
-    const body = `<span class="t">${fmt(r.t)}</span><span class="b"><span class="tag">${r.cat==="mine"?"my item":r.alert==="alarm"?"alarm":""}</span><b>${esc(r.title)}</b><span class="d">${esc(r.text)}</span></span>`;
+  $("day-rows").innerHTML = items.map((r,k)=>{
+    const tag = r.cat==="mine"?"my item":r.alert==="alarm"?"alarm":r.cat==="peak"?"power":"";
+    const body = `<span class="t">${fmt(r.t)}</span><span class="b">${tag?`<span class="tag">${tag}</span>`:""}<b>${esc(r.title)}</b><span class="d">${esc(r.text)}</span></span>`;
     const cls = `row k-${r.cat}${k===nowIdx?" is-now":""}${r.shifted?" shifted":""}`;
     if(r.cat==="peak") return `<div class="${cls}">${body}</div>`;
     const key = r.title+"@"+r.t;
     return isToday ? `<label class="${cls}">${body}<input type="checkbox" data-done="${esc(key)}"${doneMap[key]?" checked":""} aria-label="Done: ${esc(r.title)}"></label>` : `<div class="${cls}">${body}</div>`;
   }).join("") || `<div class="empty">Nothing planned.</div>`;
 }
-document.getElementById("v-day").addEventListener("click",e=>{
-  const s = e.target.closest("[data-shift]");
-  if(s){ const n = +s.dataset.shift; DAY = n===0 ? dayOnly(new Date()) : addDays(DAY,n); LATE_OPEN=false; render(); return; }
-  if(e.target.closest("#late-open")){ LATE_OPEN = !LATE_OPEN; render(); return; }
-  const l = e.target.closest("[data-late]");
-  if(l){ const n = +l.dataset.late, k = ymd(dayOnly(new Date())), nm = new Date().getHours()*60+new Date().getMinutes();
-    if(n===0) delete LATE[k]; else LATE[k] = {from: LATE[k]?LATE[k].from:nm, add: n};
-    store("bw-late",LATE); LATE_OPEN=false; afterChange(); toast(n?`Rest of today pushed back ${n} minutes`:"Back on the normal times"); return; }
-  if(e.target.closest("#day-add")){ startItem({date:ymd(DAY)}); show("mine"); }
+$("v-day").addEventListener("click",e=>{
+  const l = e.target.closest("[data-late]"); if(!l) return;
+  const n = +l.dataset.late, k = ymd(dayOnly(new Date())), nm = new Date().getHours()*60+new Date().getMinutes();
+  if(n===0) delete LATE[k]; else LATE[k] = {from: LATE[k]?LATE[k].from:nm, add: n};
+  store("bw-late",LATE); LATE_OPEN=false; afterChange(); toast(n?`Rest of today pushed back ${n} minutes`:"Back on the normal times");
 });
-document.getElementById("v-day").addEventListener("change",e=>{
+$("v-day").addEventListener("change",e=>{
   const k = e.target.dataset.done; if(k===undefined) return;
   const key = "bw-done-"+ymd(DAY), m = load(key,{}); m[k] = e.target.checked; store(key,m);
 });
@@ -723,64 +933,66 @@ document.getElementById("v-day").addEventListener("change",e=>{
 /* ---------- Calendar ---------- */
 function renderCal(){
   const y = CALM.getFullYear(), mo = CALM.getMonth(), first = new Date(y,mo,1), start = addDays(first,-first.getDay()), today = ymd(dayOnly(new Date()));
-  document.getElementById("cal-month").textContent = first.toLocaleDateString("en-US",{month:"long",year:"numeric"}).toLowerCase();
+  $("cal-month").textContent = first.toLocaleDateString("en-US",{month:"long",year:"numeric"}).toLowerCase();
   let html = ["S","M","T","W","T","F","S"].map(x=>`<div class="dow">${x}</div>`).join("");
   for(let n=0;n<42;n++){
     const d = addDays(start,n), tt = tripFor(d), k = kindFor(d), m = machineFor(d), dots = [];
-    if(tt) dots.push("--amber");
-    else { if(k==="work") dots.push("--cobalt"); if(k==="game") dots.push("--purple"); if(k==="prep"&&bentoOn(d)) dots.push("--orange"); }
-    if(m==="L") dots.push("--teal"); if(m==="D") dots.push("--steel");
-    if(mineFor(d).length) dots.push("--lime");
-    html += `<button type="button" class="cell${d.getMonth()!==mo?" out":""}${ymd(d)===today?" today":""}" data-day="${ymd(d)}" aria-label="${nice(d)}"><span class="n">${d.getDate()}</span><span class="dots">${dots.map(c=>`<i class="dot" style="background:var(${c})"></i>`).join("")}</span></button>`;
+    if(tt) dots.push("#f0a30a");
+    else { if(k==="work") dots.push("#1ba1e2"); if(k==="game") dots.push("#aa00ff"); if(k==="prep"&&bentoOn(d)) dots.push("#fa6800"); }
+    if(m==="L") dots.push("#00aba9"); if(m==="D") dots.push("#647687");
+    if(mineFor(d).length) dots.push("#a4c400");
+    html += `<button type="button" class="cell${d.getMonth()!==mo?" out":""}${ymd(d)===today?" today":""}" data-day="${ymd(d)}" aria-label="${nice(d)}"><span class="n">${d.getDate()}</span><span class="dots">${dots.map(c=>`<i class="dot" style="background:${c}"></i>`).join("")}</span></button>`;
   }
-  document.getElementById("cal").innerHTML = html;
+  $("cal").innerHTML = html;
+  // Coming up: your items and trips over the next 3 weeks
+  const up = [], t0 = dayOnly(new Date());
+  for(let i=0;i<21;i++){ const d = addDays(t0,i), tt = tripFor(d);
+    if(tt && tt.type==="depart") up.push({d,t:tt.trip.leaveTime,title:"Leave: "+tt.trip.name,text:"Home "+nice(parseYmd(tt.trip.back))});
+    mineFor(d).forEach(m=>up.push({d,t:m[0],title:m[2],text:m[3]})); }
+  $("upcoming").innerHTML = up.slice(0,12).map(u=>`<div class="row"><span class="t">${nice(u.d)}<br>${fmt(u.t)}</span><span class="b"><b>${esc(u.title)}</b><span class="d">${esc(u.text)}</span></span></div>`).join("") || `<div class="empty">Nothing added for the next 3 weeks. Use add to put appointments and onsites here.</div>`;
 }
-document.getElementById("cal").addEventListener("click",e=>{ const c = e.target.closest("[data-day]"); if(!c) return; DAY = parseYmd(c.dataset.day); LATE_OPEN=false; show("day"); });
-document.getElementById("cal-prev").addEventListener("click",()=>{ CALM = new Date(CALM.getFullYear(),CALM.getMonth()-1,1); render(); });
-document.getElementById("cal-next").addEventListener("click",()=>{ CALM = new Date(CALM.getFullYear(),CALM.getMonth()+1,1); render(); });
+$("cal").addEventListener("click",e=>{ const c = e.target.closest("[data-day]"); if(!c) return; DAY = parseYmd(c.dataset.day); LATE_OPEN=false; show("day"); });
 
-/* ---------- Meals and prep ---------- */
-function weekPills(id,sel,cur){
-  document.getElementById(id).innerHTML = ROT.map((w,i)=>`<button type="button" class="pill${i===cur?" now":""}" data-w="${i}" aria-pressed="${i===sel}">${w.k}</button>`).join("");
-}
+/* ---------- Meals, prep, recipes ---------- */
+function weekPills(id,sel,cur){ $(id).innerHTML = ROT.map((w,i)=>`<button type="button" class="pill" data-w="${i}" aria-pressed="${i===sel}">${w.k}${i===cur?" ·":""}</button>`).join(""); }
 function curWeek(){ const t = dayOnly(new Date()); return bentoOn(t) ? weekFor(t) : -1; }
 function renderMeals(){
   const cur = curWeek(); if(MEALW===null) MEALW = Math.max(cur,0);
   weekPills("meal-weeks",MEALW,cur);
   const w = ROT[MEALW];
-  document.getElementById("meals-sub").textContent = `Week ${w.k}: ${w.name}. ${cur<0?"Cooking starts "+nice(parseYmd(CFG.bentoStart))+" with Week A.":cur===MEALW?"This is this week.":""}`;
-  document.getElementById("meal-days").innerHTML = [1,2,3,4,5,6,0].map(i=>`<div class="meal-day"><h4>${DAYNAMES[i]} <small>· ${KINDS[CFG.days[i]]||""}</small></h4>${w.days[i].map((f,m)=>f==="—"?"":`<div><small>${NAMES[m]}:</small> ${esc(f)}</div>`).join("")}</div>`).join("");
+  $("meals-sub").textContent = `Week ${w.k}: ${w.name}. ${cur<0?"Cooking starts "+nice(parseYmd(CFG.bentoStart))+" with Week A.":cur===MEALW?"This is this week.":""}`;
+  $("meal-days").innerHTML = [1,2,3,4,5,6,0].map(i=>`<div class="meal-day"><h4>${DAYNAMES[i].toLowerCase()}</h4>${w.days[i].map((f,m)=>f==="—"?"":`<div><small>${NAMES[m]}:</small> ${esc(f)}</div>`).join("")}</div>`).join("");
 }
-document.getElementById("meal-weeks").addEventListener("click",e=>{ const b = e.target.closest("[data-w]"); if(b){ MEALW = +b.dataset.w; render(); } });
+$("meal-weeks").addEventListener("click",e=>{ const b = e.target.closest("[data-w]"); if(b){ MEALW = +b.dataset.w; render(); } });
 function renderPrep(){
   const cur = curWeek(); if(PREPW===null) PREPW = Math.max(cur,0);
   weekPills("prep-weeks",PREPW,cur);
   const w = ROT[PREPW], mon = (()=>{ let d = dayOnly(new Date()); while(d.getDay()!==1) d = addDays(d,1); return d<parseYmd(CFG.bentoStart)?parseYmd(CFG.bentoStart):d; })();
   const start = Math.max(720,sleepFor(mon).W+240)+30;
   const shift = t=>{ const [h,m] = t.split(":").map(Number); return fmt(h*60+m-240+start); };
-  document.getElementById("prep-sub").textContent = `Week ${w.k}: ${w.name}. Monday, ${fmt(start)}–${fmt(start+75)}, done before peak hours.`;
+  $("prep-sub").textContent = `Week ${w.k}: ${w.name}. Monday, ${fmt(start)}–${fmt(start+75)}, done before peak hours.`;
   const steps = [["4:00","Boil 6 eggs","6½ minutes, ice bath, peel, into the marinade. Ready by Tuesday morning."], ...w.prep,
     ["4:55","Shape 6 onigiri",`Microwave 3 rice bowls, cool 2 minutes, press 2 per bowl in your kit's triangle molds. ${w.onigiri[0].toUpperCase()+w.onigiri.slice(1)} filling.`],
     ["5:05","Portion into prep containers","Proteins and sides into small containers. Each workday morning, fill your bento from them."]];
-  document.getElementById("prep-steps").innerHTML = steps.map(s=>`<li><span class="t">${shift(s[0])}</span><span><b>${esc(s[1])}</b><br><span style="color:var(--dim)">${esc(s[2])}</span></span></li>`).join("");
+  $("prep-steps").innerHTML = steps.map(s=>`<li><span class="t">${shift(s[0])}</span><span><b style="font-weight:400;font-size:17px">${esc(s[1])}</b><br><span style="color:var(--dim)">${esc(s[2])}</span></span></li>`).join("");
 }
-document.getElementById("prep-weeks").addEventListener("click",e=>{ const b = e.target.closest("[data-w]"); if(b){ PREPW = +b.dataset.w; render(); } });
+$("prep-weeks").addEventListener("click",e=>{ const b = e.target.closest("[data-w]"); if(b){ PREPW = +b.dataset.w; render(); } });
 function renderRecipes(){
-  document.getElementById("recipe-list").innerHTML = RECIPES.map(r=>`<div class="card"><h4>${esc(r.n)}</h4><div class="jp">${esc(r.jp)}</div><ul>${r.ing.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>${r.how?`<p>${esc(r.how)}</p>`:""}<div class="uses">Used for: ${esc(r.uses)}</div></div>`).join("");
+  $("recipe-list").innerHTML = RECIPES.map(r=>`<div class="card"><h4>${esc(r.n).toLowerCase()}</h4><div class="jp">${esc(r.jp)}</div><ul>${r.ing.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>${r.how?`<p>${esc(r.how)}</p>`:""}<div class="uses">Used for: ${esc(r.uses)}</div></div>`).join("");
 }
 
 /* ---------- Shopping ---------- */
 function renderShop(){
-  document.getElementById("stores").innerHTML = STORES.map(s=>{
+  $("stores").innerHTML = STORES.map(s=>{
     const extra = SHOPX[s.id]||[];
     const left = s.items.filter((_,k)=>!CHECKS[s.id+k]).length + extra.filter(x=>!x.done).length;
-    return `<div class="store-head"><h3>${esc(s.n)}</h3><small>${left} left · ${esc(s.when)}</small></div>`+
+    return `<div class="store-head"><h3>${esc(s.n).toLowerCase()}</h3><small>${left} left</small></div><div class="note" style="margin:0 0 4px">${esc(s.when)}</div>`+
       s.items.map((it,k)=>`<label class="check"><input type="checkbox" data-c="${s.id+k}"${CHECKS[s.id+k]?" checked":""}><span>${esc(it[0])}${it[1]?`<small>${esc(it[1])}</small>`:""}</span></label>`).join("")+
       extra.map(x=>`<label class="check"><input type="checkbox" data-x="${s.id}|${x.id}"${x.done?" checked":""}><span>${esc(x.t)}<small>Added by you</small></span><button class="x" type="button" data-xdel="${s.id}|${x.id}" aria-label="Remove ${esc(x.t)}">&#215;</button></label>`).join("")+
       `<form class="inline-add" data-add="${s.id}"><input type="text" placeholder="Add an item" aria-label="Add an item to ${esc(s.n)}"><button class="btn" type="submit">Add</button></form>`;
   }).join("");
 }
-const vshop = document.getElementById("v-shop");
+const vshop = $("v-shop");
 vshop.addEventListener("change",e=>{
   const c = e.target.dataset.c, x = e.target.dataset.x;
   if(c!==undefined){ CHECKS[c] = e.target.checked; store("bento-checks",CHECKS); }
@@ -795,10 +1007,8 @@ vshop.addEventListener("submit",e=>{
   const v = f.querySelector("input").value.trim(); if(!v) return;
   (SHOPX[f.dataset.add] = SHOPX[f.dataset.add]||[]).push({id:uid(),t:v,done:false}); store("bw-shop-extra",SHOPX); render();
 });
-document.getElementById("shop-reset").addEventListener("click",()=>{ CHECKS = {}; store("bento-checks",CHECKS); Object.values(SHOPX).forEach(a=>a.forEach(x=>x.done=false)); store("bw-shop-extra",SHOPX); render(); toast("Checkmarks cleared"); });
 
 /* ---------- My items ---------- */
-const $ = id=>document.getElementById(id);
 $("mf-days").innerHTML = DAYNAMES.map((n,i)=>`<label><input type="checkbox" value="${i}"> ${n.slice(0,3)}</label>`).join("");
 function syncRepeat(){ const r = $("mf-repeat").value; $("mf-date-wrap").hidden = r!=="once"; $("mf-days-wrap").hidden = r!=="weekly"; }
 $("mf-repeat").addEventListener("change",syncRepeat);
@@ -835,7 +1045,43 @@ function renderMine(){
 $("mine-list").addEventListener("click",e=>{
   const ed = e.target.closest("[data-edit]"), de = e.target.closest("[data-del]");
   if(ed){ startItem(ITEMS.find(x=>x.id===ed.dataset.edit)); window.scrollTo(0,0); }
-  if(de){ const b = de; if(b.dataset.sure){ ITEMS = ITEMS.filter(x=>x.id!==b.dataset.del); saveItems(); toast("Item deleted"); } else { b.dataset.sure = "1"; b.textContent = "Tap to confirm"; } }
+  if(de){ if(de.dataset.sure){ ITEMS = ITEMS.filter(x=>x.id!==de.dataset.del); saveItems(); toast("Item deleted"); } else { de.dataset.sure = "1"; de.textContent = "Tap to confirm"; } }
+});
+
+/* ---------- Photos ---------- */
+function renderPhotos(){
+  const ids = photoIds();
+  $("gallery").innerHTML = ids.map(id=>`<div class="ph" style="background-image:url('${load("bw-photo-"+id,"")}')"><button type="button" data-pdel="${id}" aria-label="Remove photo">${ICON.x}</button></div>`).join("")
+    || `<div class="empty" style="grid-column:1/-1">No photos yet. Tap add photo below.</div>`;
+}
+$("gallery").addEventListener("click",e=>{ const b = e.target.closest("[data-pdel]"); if(!b) return;
+  const id = b.dataset.pdel; store("bw-photo-ids",photoIds().filter(x=>x!==id)); try{ localStorage.removeItem("bw-photo-"+id); }catch(err){} render(); });
+
+/* ---------- Look ---------- */
+function picRow(key,name){
+  const p = getPic(key);
+  return `<div class="picrow"><span class="thumb" style="${p?`background-image:url('${p}')`:""}"></span><b>${name}</b><button class="btn" type="button" data-pick="${key}">${p?"Change":"Choose picture"}</button>${p?`<button class="btn warn" type="button" data-unpick="${key}">Remove</button>`:""}</div>`;
+}
+function renderLook(){
+  $("swatches").innerHTML = ACCENTS.map(c=>`<button type="button" class="swatch" style="background:${c}" data-accent="${c}" aria-pressed="${c===CFG.accent}" aria-label="Accent ${c}"></button>`).join("");
+  $("l-mixed").checked = !!CFG.mixed;
+  $("bgrow").innerHTML = picRow("startbg","Start background");
+  $("tilepics").innerHTML = PIC_TILES.map(([k,n])=>picRow(k,n)).join("");
+}
+$("v-look").addEventListener("click",e=>{
+  const a = e.target.closest("[data-accent]"); if(a){ CFG.accent = a.dataset.accent; saveCfg(); return; }
+  const p = e.target.closest("[data-pick]"); if(p){ pickPicture(p.dataset.pick); return; }
+  const u = e.target.closest("[data-unpick]"); if(u){ setPic(u.dataset.unpick,""); render(); toast("Picture removed"); }
+});
+$("l-mixed").addEventListener("change",e=>{ CFG.mixed = e.target.checked; saveCfg(); });
+$("picker").addEventListener("change",async e=>{
+  const f = e.target.files && e.target.files[0]; if(!f || !PICK) return;
+  try{
+    const data = await shrink(f, PICK==="startbg" ? 1100 : 640);
+    if(PICK==="album"){ const id = uid(); try{ localStorage.setItem("bw-photo-"+id,JSON.stringify(data)); store("bw-photo-ids",photoIds().concat(id)); toast("Photo added"); }catch(err){ toast("Not enough room for that photo. Remove one first."); } }
+    else if(setPic(PICK,data)) toast("Picture set");
+  }catch(err){ toast("That picture couldn't be opened."); }
+  PICK = null; render();
 });
 
 /* ---------- Settings ---------- */
@@ -845,12 +1091,11 @@ function renderSettings(){
   $("s-ws").value = toHHMM(CFG.workStart); $("s-we").value = toHHMM(CFG.workEnd); $("s-drive").value = CFG.drive;
   $("s-ps").value = toHHMM(CFG.peakStart); $("s-pe").value = toHHMM(CFG.peakEnd);
   $("s-mach").value = CFG.machineStart; $("s-bento").value = CFG.bentoStart; $("s-dog").checked = !!CFG.dogsAtHome;
-  const today = dayOnly(new Date()), s = sleepFor(today);
+  const s = sleepFor(dayOnly(new Date()));
   $("s-ramp").textContent = s.ramp ? `The bedtime ramp is still stepping down (today: up ${fmt(s.W)}, lights out ${fmt(s.L)}). From Oct 13 these times take over.` : "";
   $("s-days").innerHTML = [1,2,3,4,5,6,0].map(i=>`<label>${DAYNAMES[i]}<select data-dow="${i}">${DAYKINDS.map(([v,n])=>`<option value="${v}"${CFG.days[i]===v?" selected":""}>${n}</option>`).join("")}</select></label>`).join("");
-  $("trip-list").innerHTML = CFG.trips.length ? CFG.trips.map(t=>`<div class="trip"><b>${esc(t.name)}</b><div class="note">Leave ${nice(parseYmd(t.leave))} at ${fmt(t.leaveTime)} · home ${nice(parseYmd(t.back))}${t.dogs?" · dog reminders":""}</div>
-    <div class="actions" style="margin:6px 0 0"><button class="btn" type="button" data-tedit="${t.id}">Edit</button><button class="btn warn" type="button" data-tdel="${t.id}">Delete</button></div></div>`).join("") : `<div class="empty">No trips planned.</div>`;
-  if(document.activeElement!==$("io")) $("io").value = "";
+  $("trip-list").innerHTML = CFG.trips.length ? CFG.trips.map(t=>`<div class="item"><div class="b"><b>${esc(t.name)}</b><small>Leave ${nice(parseYmd(t.leave))} at ${fmt(t.leaveTime)} · home ${nice(parseYmd(t.back))}${t.dogs?" · dog reminders":""}</small></div>
+    <button class="btn" type="button" data-tedit="${t.id}">Edit</button><button class="btn warn" type="button" data-tdel="${t.id}">Delete</button></div>`).join("") : `<div class="empty">No trips planned.</div>`;
 }
 $("set-form").addEventListener("change",e=>{
   const el = e.target;
@@ -889,8 +1134,7 @@ $("trip-list").addEventListener("click",e=>{
 $("io-copy").addEventListener("click",()=>{
   const text = JSON.stringify({v:1,settings:CFG,items:ITEMS,shopExtra:SHOPX});
   $("io").value = text; $("io").focus(); $("io").select();
-  const done = ()=>toast("Copied. Paste it on the other device.");
-  try{ navigator.clipboard.writeText(text).then(done,()=>toast("Selected. Use your phone's Copy.")); }catch(e){ toast("Selected. Use your phone's Copy."); }
+  try{ navigator.clipboard.writeText(text).then(()=>toast("Copied. Paste it on the other device."),()=>toast("Selected. Use your phone's Copy.")); }catch(e){ toast("Selected. Use your phone's Copy."); }
 });
 $("io-load").addEventListener("click",()=>{
   try{ const o = JSON.parse($("io").value); if(!o||!o.settings) throw 0;
@@ -900,20 +1144,22 @@ $("io-load").addEventListener("click",()=>{
 });
 $("io-reset").addEventListener("click",e=>{
   const b = e.target; if(!b.dataset.sure){ b.dataset.sure="1"; b.textContent="Tap again to reset"; return; }
-  CFG = JSON.parse(JSON.stringify(DEFAULTS)); store("bw-settings",CFG); b.dataset.sure=""; b.textContent="Reset settings"; afterChange(); toast("Settings reset");
+  const keep = {accent:CFG.accent,mixed:CFG.mixed}; CFG = Object.assign(JSON.parse(JSON.stringify(DEFAULTS)),keep); store("bw-settings",CFG); b.dataset.sure=""; b.textContent="Reset settings"; afterChange(); toast("Settings reset");
 });
 
-/* ---------- Render loop ---------- */
+/* ---------- Render ---------- */
 function render(){
-  ({home:renderHome,day:renderDay,cal:renderCal,meals:renderMeals,prep:renderPrep,recipes:renderRecipes,shop:renderShop,mine:renderMine,settings:renderSettings}[VIEW]||renderHome)();
+  renderPivots(); renderAppbar();
+  ({home:renderHome,apps:renderApps,day:renderDay,cal:renderCal,mine:renderMine,meals:renderMeals,prep:renderPrep,recipes:renderRecipes,shop:renderShop,photos:renderPhotos,settings:renderSettings,look:renderLook}[VIEW]||renderHome)();
 }
 (function boot(){
-  startItem({}); startTrip({});
+  applyAccent(); startItem({}); startTrip({});
   const last = load("bw-view",null);
-  if(last && Date.now()-last.at < 15*60*1000 && last.view && last.view!=="home"){ if(last.day) DAY = parseYmd(last.day); try{ history.replaceState({view:"home"},""); }catch(e){} show(last.view); }
-  else { try{ history.replaceState({view:"home"},""); }catch(e){} show("home",false); }
+  try{ history.replaceState({view:"home"},""); }catch(e){}
+  if(last && Date.now()-last.at < 15*60*1000 && last.view && last.view!=="home"){ if(last.day) DAY = parseYmd(last.day); show(last.view,true,false); }
+  else show("home",false,false);
   scheduleApp();
-  setInterval(()=>{ if(VIEW==="home"||VIEW==="day") render(); },30000);
+  setInterval(()=>{ if(VIEW==="day") renderDay(); if(VIEW==="home"){ const f = [...document.querySelectorAll(".tile")].map(t=>t.dataset.face); renderHome(); document.querySelectorAll(".tile").forEach((t,i)=>{ if(f[i]&&+f[i]<+t.dataset.faces) t.dataset.face = f[i]; }); } },60000);
 })();
 </script>
 
