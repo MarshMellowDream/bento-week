@@ -3,196 +3,281 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<style>html{-webkit-text-size-adjust:100%}body{margin:0;font-size:14px}img{max-width:100%}[hidden]{display:none!important}</style>
+<style>html{-webkit-text-size-adjust:100%}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Bento Week</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@600;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=IBM+Plex+Mono:wght@500&display=swap">
 <style>
-/* Layout: a bento box — a "today" lid on top, then tabbed compartments for week, prep, recipes, shopping */
+/* Layout: Windows Phone style. A tile home screen on black; each tile opens a full-screen "pivot" page with a big lowercase title. */
 :root{
-  --bg:#f3f4f1; --paper:#ffffff; --ink:#1d2330; --muted:#5d6472; --line:#dcdfe3;
-  --ai:#24407a; --ai-soft:#e3e9f5; --ume:#b23a48; --ume-soft:#f7e4e6; --nori:#3c5a3a; --nori-soft:#e4ede2;
-  --display:"Shippori Mincho","Hiragino Mincho ProN",Georgia,serif;
-  --body:"Zen Kaku Gothic New","Hiragino Sans",system-ui,sans-serif;
-  --mono:"IBM Plex Mono",ui-monospace,monospace;
+  --bg:#000; --fg:#fff; --dim:#a6a6a6; --line:#2b2b2b; --panel:#1a1a1a;
+  --cobalt:#0050ef; --magenta:#d80073; --orange:#fa6800; --lime:#8cbf26; --teal:#00aba9;
+  --red:#e51400; --purple:#6a00ff; --brown:#825a2c; --steel:#647687; --emerald:#008a00; --amber:#f0a30a;
+  --font:"Segoe UI","Selawik","Roboto","Helvetica Neue",Arial,sans-serif;
+  color-scheme:dark;
 }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#12151c; --paper:#1b2029; --ink:#e8eaee; --muted:#a2a8b4; --line:#2e3542;
-  --ai:#9db4ea; --ai-soft:#22304d; --ume:#ec8b96; --ume-soft:#3d2228; --nori:#9cc596; --nori-soft:#223324; color-scheme:dark}}
-:root[data-theme="dark"]{
-  --bg:#12151c; --paper:#1b2029; --ink:#e8eaee; --muted:#a2a8b4; --line:#2e3542;
-  --ai:#9db4ea; --ai-soft:#22304d; --ume:#ec8b96; --ume-soft:#3d2228; --nori:#9cc596; --nori-soft:#223324; color-scheme:dark}
 *{box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.6}
-.wrap{max-width:860px;margin:0 auto;padding-inline:16px;padding-block:24px 56px}
-header h1{font-family:var(--display);font-weight:800;font-size:clamp(28px,6vw,40px);line-height:1.15;margin:0;text-wrap:balance}
-header h1 span{color:var(--ume)}
-header p{color:var(--muted);margin:6px 0 0;max-width:60ch}
-.label{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+html,body{background:var(--bg);color:var(--fg)}
+body{font-family:var(--font);font-size:15px;line-height:1.45;-webkit-tap-highlight-color:transparent}
+button,input,select,textarea{font:inherit;color:inherit}
+.wrap{max-width:900px;margin:0 auto;padding-inline:16px;padding-block:20px 48px}
+.view[hidden]{display:none!important}
 
-/* Today lid */
-.today{margin-top:20px;background:var(--paper);border:1px solid var(--line);border-radius:14px;overflow:hidden}
-.today-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;padding:14px 16px;border-bottom:1px solid var(--line)}
-.today-head h2{font-family:var(--display);font-size:22px;margin:0}
-.pill{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border-radius:99px}
-.pill.work{background:var(--ai-soft);color:var(--ai)}
-.pill.off{background:var(--nori-soft);color:var(--nori)}
-.pill.prep{background:var(--ume-soft);color:var(--ume)}
-.slots{display:grid;grid-template-columns:repeat(4,1fr)}
-.slot{padding:14px 16px;border-right:1px solid var(--line);min-width:0}
-.slot:last-child{border-right:0}
-.slot .time{font-family:var(--mono);font-size:12px;color:var(--ai);font-variant-numeric:tabular-nums}
-.slot .name{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:2px}
-.slot .food{margin-top:6px;font-weight:500}
-.note{padding:10px 16px;background:var(--ume-soft);color:var(--ink);font-size:14px}
-/* Day plan */
-.today .switch{padding:12px 16px 0;margin:0}
-.kind-blurb{padding:8px 16px 12px;margin:0;color:var(--muted);font-size:14px;border-bottom:1px solid var(--line)}
-.done-count{font-family:var(--mono);font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
-.row{display:grid;grid-template-columns:72px 1fr auto;gap:12px;align-items:start;padding:11px 16px;border-bottom:1px solid var(--line)}
-.row:last-child{border-bottom:0}
+/* Home */
+.home-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:16px}
+.home-head h1{font-weight:300;font-size:40px;line-height:1;margin:0;letter-spacing:-.5px}
+.home-head .clock{text-align:right;color:var(--dim);font-size:13px;line-height:1.3}
+.home-head .clock b{display:block;color:var(--fg);font-weight:300;font-size:28px;font-variant-numeric:tabular-nums}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:86px;grid-auto-flow:row dense;gap:8px}
+@media (min-width:640px){.tiles{grid-template-columns:repeat(6,1fr)}}
+.tile{position:relative;border:0;padding:10px;text-align:left;cursor:pointer;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;min-width:0;color:#fff}
+.tile:active{transform:scale(.97)}
+.tile:focus-visible{outline:3px solid #fff;outline-offset:2px}
+.t11{grid-column:span 1}
+.t21{grid-column:span 2}
+.t22{grid-column:span 2;grid-row:span 2}
+.t42{grid-column:span 4;grid-row:span 2}
+.tile .name{font-size:13px;font-weight:400;text-transform:lowercase;opacity:.95}
+.tile .big{font-size:46px;font-weight:300;line-height:1}
+.tile .mid{font-size:19px;font-weight:300;line-height:1.2}
+.tile .small{font-size:13px;opacity:.9;line-height:1.3}
+.tile .glyph{font-size:34px;font-weight:300;line-height:1;align-self:center;margin:auto 0}
+.tile .count{position:absolute;top:8px;right:10px;font-size:22px;font-weight:300}
+.tile .clip{overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3}
+.c-cobalt{background:var(--cobalt)} .c-magenta{background:var(--magenta)} .c-orange{background:var(--orange)} .c-lime{background:var(--lime)}
+.c-teal{background:var(--teal)} .c-red{background:var(--red)} .c-purple{background:var(--purple)} .c-brown{background:var(--brown)}
+.c-steel{background:var(--steel)} .c-emerald{background:var(--emerald)} .c-amber{background:var(--amber)}
+
+/* Pages */
+.page-head{display:flex;align-items:center;gap:12px;margin:0 0 6px}
+.back{border:2px solid var(--fg);background:transparent;border-radius:50%;width:38px;height:38px;flex:none;cursor:pointer;font-size:18px;line-height:1}
+.page-head h2{font-weight:300;font-size:42px;margin:0;line-height:1;text-transform:lowercase;letter-spacing:-.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sub{color:var(--dim);margin:6px 0 16px;font-size:14px}
+.sec{font-size:22px;font-weight:300;margin:22px 0 8px;text-transform:lowercase}
+.pills{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 12px}
+.pill{border:2px solid var(--fg);background:transparent;padding:4px 12px;cursor:pointer;font-size:14px;min-width:40px}
+.pill[aria-pressed="true"]{background:var(--fg);color:#000}
+.pill.now{border-color:var(--cobalt)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 14px}
+.btn{border:2px solid var(--fg);background:transparent;padding:6px 14px;cursor:pointer;font-size:14px}
+.btn.solid{background:var(--fg);color:#000}
+.btn.warn{border-color:var(--red);color:#ff6a5c}
+
+/* Day list */
+.day-meta{display:flex;flex-wrap:wrap;gap:6px 14px;color:var(--dim);font-size:13px;margin:0 0 12px}
+.day-meta b{color:var(--fg);font-weight:400}
+.rows{border-top:1px solid var(--line)}
+.row{display:grid;grid-template-columns:70px 1fr auto;gap:12px;align-items:start;padding:11px 0 11px 10px;border-bottom:1px solid var(--line);border-left:4px solid var(--steel)}
 label.row{cursor:pointer}
-.row .t{font-family:var(--mono);font-size:13px;color:var(--ai);font-variant-numeric:tabular-nums;padding-top:2px}
+.row .t{font-variant-numeric:tabular-nums;color:var(--dim);font-size:14px;padding-top:1px}
 .row .b{min-width:0}
-.row .cat{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
-.row b{display:block;font-weight:700}
-.row .d{display:block;font-size:14px;color:var(--muted)}
-.row input{width:20px;height:20px;margin-top:4px;accent-color:var(--ai)}
-.row input:focus-visible{outline:2px solid var(--ume);outline-offset:2px}
-.row.is-now{background:var(--ai-soft)}
-.row:has(input:checked) b{text-decoration:line-through;color:var(--muted)}
-.row.peak{background:var(--ume-soft)}
-.row.peak .t,.row.peak .cat{color:var(--ume)}
-.row.c-care .cat{color:var(--ume)}
-.row.c-eat .cat{color:var(--nori)}
-.row.c-house .cat{color:var(--ai)}
-@media (max-width:480px){.row{grid-template-columns:62px 1fr auto;gap:10px}}
-@media (max-width:640px){.slots{grid-template-columns:1fr 1fr}.slot:nth-child(2){border-right:0}.slot:nth-child(-n+2){border-bottom:1px solid var(--line)}}
+.row b{display:block;font-weight:400;font-size:16px}
+.row .d{display:block;color:var(--dim);font-size:13px}
+.row .tag{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--dim)}
+.row input{width:22px;height:22px;margin:2px 4px 0 0;accent-color:var(--lime)}
+.row:has(input:checked) b{text-decoration:line-through;color:var(--dim)}
+.row.is-now{background:#0d1f3d}
+.row.k-care{border-left-color:var(--magenta)} .row.k-eat{border-left-color:var(--orange)} .row.k-house{border-left-color:var(--teal)}
+.row.k-work{border-left-color:var(--cobalt)} .row.k-play{border-left-color:var(--purple)} .row.k-sleep{border-left-color:var(--steel)}
+.row.k-mine{border-left-color:var(--lime)} .row.k-dog{border-left-color:var(--amber)} .row.k-peak{border-left-color:var(--red);background:#1c0805}
+.row.shifted .t{color:#ff9d8a}
 
-/* Tabs */
-nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);margin-top:24px;padding-block:8px;display:flex;gap:6px;overflow-x:auto}
-nav button{font:inherit;font-weight:700;font-size:14px;border:1px solid var(--line);background:var(--paper);color:var(--ink);padding:8px 14px;border-radius:99px;cursor:pointer;white-space:nowrap}
-nav button[aria-selected="true"]{background:var(--ai);border-color:var(--ai);color:var(--paper)}
-nav button:focus-visible,.check input:focus-visible{outline:2px solid var(--ume);outline-offset:2px}
-section{margin-top:12px}
-section h3{font-family:var(--display);font-size:24px;margin:8px 0 4px;text-wrap:balance}
-section > p.lead{color:var(--muted);margin:0 0 14px;max-width:62ch}
+/* Calendar */
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin:0 0 10px}
+.cal-nav b{font-size:22px;font-weight:300}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal .dow{font-size:12px;color:var(--dim);text-align:center;padding:2px 0}
+.cell{aspect-ratio:1/1;background:var(--panel);border:0;padding:4px;text-align:left;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;min-width:0;color:var(--fg)}
+.cell.out{opacity:.35}
+.cell.today{background:var(--cobalt)}
+.cell .n{font-size:16px;font-weight:300}
+.cell .dots{display:flex;gap:3px;flex-wrap:wrap}
+.cell .dot{width:7px;height:7px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;color:var(--dim);font-size:12px;margin:10px 0}
+.legend span::before{content:"";display:inline-block;width:9px;height:9px;margin-right:5px;vertical-align:-1px;background:var(--c)}
 
-/* Week */
-.days{display:grid;gap:10px}
-.day{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
-.day.is-today{border-color:var(--ai);box-shadow:0 0 0 1px var(--ai)}
-.day-top{display:flex;align-items:center;gap:10px;margin-bottom:8px}
-.day-top b{font-family:var(--display);font-size:18px}
-.meals{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-.meals div{min-width:0;font-size:14px}
-.meals small{display:block;font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.06em}
-@media (max-width:640px){.meals{grid-template-columns:1fr 1fr}}
-
-/* Prep timeline */
-.steps{list-style:none;margin:0;padding:0;display:grid;gap:0;background:var(--paper);border:1px solid var(--line);border-radius:12px;overflow:hidden}
-.steps li{display:grid;grid-template-columns:78px 1fr;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line)}
-.steps li:last-child{border-bottom:0}
-.steps .t{font-family:var(--mono);color:var(--ume);font-variant-numeric:tabular-nums;font-size:14px;padding-top:1px}
-.steps b{display:block}
-.callout{margin-top:12px;padding:12px 14px;border-left:3px solid var(--nori);background:var(--nori-soft);border-radius:0 10px 10px 0;font-size:14px}
-
-/* Recipes */
-.recipes{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
-.recipe{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:14px}
-.recipe h4{margin:0;font-family:var(--display);font-size:18px}
-.recipe .jp{font-size:12px;color:var(--muted)}
-.recipe ul{margin:8px 0 0;padding-left:18px;font-size:14px}
-.recipe p{margin:8px 0 0;font-size:14px}
-.recipe .uses{margin-top:10px;font-family:var(--mono);font-size:11px;color:var(--ai);letter-spacing:.04em}
-
-/* Shopping */
-.stores{display:grid;gap:12px}
-.store{background:var(--paper);border:1px solid var(--line);border-radius:12px;overflow:hidden}
-.store-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;padding:12px 14px;border-bottom:1px solid var(--line)}
-.store-head h4{margin:0;font-family:var(--display);font-size:19px}
-.store-head .count{font-family:var(--mono);font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
-.check{display:flex;gap:10px;align-items:flex-start;padding:10px 14px;border-bottom:1px solid var(--line);cursor:pointer}
-.check:last-child{border-bottom:0}
-.check input{width:18px;height:18px;margin-top:3px;accent-color:var(--ai);flex:none}
+/* Lists, cards, forms */
+.card{background:var(--panel);padding:12px 14px;margin:0 0 8px}
+.card h4{margin:0;font-weight:400;font-size:18px}
+.card .jp{color:var(--dim);font-size:12px}
+.card ul{margin:6px 0 0;padding-left:18px;font-size:14px}
+.card p{margin:6px 0 0;font-size:14px}
+.card .uses{margin-top:8px;font-size:12px;color:var(--lime)}
+.meal-day{border-left:4px solid var(--orange);background:var(--panel);padding:10px 12px;margin:0 0 8px}
+.meal-day h4{margin:0 0 4px;font-weight:400;font-size:17px}
+.meal-day div{font-size:14px;color:#ddd}
+.meal-day small{color:var(--dim)}
+.steps li{margin:0 0 8px}
+.steps{padding-left:0;list-style:none}
+.steps li{display:grid;grid-template-columns:78px 1fr;gap:10px;background:var(--panel);padding:10px 12px}
+.steps .t{color:var(--amber);font-variant-numeric:tabular-nums}
+.check{display:flex;gap:10px;align-items:flex-start;padding:10px 4px;border-bottom:1px solid var(--line);cursor:pointer}
+.check input{width:20px;height:20px;margin-top:2px;accent-color:var(--lime);flex:none}
 .check span{min-width:0}
-.check small{display:block;color:var(--muted);font-size:13px}
-.check input:checked + span{text-decoration:line-through;color:var(--muted)}
-.reset{font:inherit;font-size:13px;border:1px solid var(--line);background:transparent;color:var(--muted);padding:6px 12px;border-radius:99px;cursor:pointer;margin-top:12px}
-footer{margin-top:28px;font-size:12px;color:var(--muted)}
-footer a{color:var(--ai)}
-/* Rotation switcher */
-.switch{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 6px}
-.switch button{font:inherit;font-family:var(--display);font-weight:800;font-size:16px;width:40px;height:40px;border-radius:10px;border:1px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer;position:relative}
-.switch button[aria-pressed="true"]{background:var(--ume);border-color:var(--ume);color:var(--paper)}
-.switch button.current::after{content:"";position:absolute;bottom:4px;left:50%;width:5px;height:5px;margin-left:-2.5px;border-radius:50%;background:var(--ai)}
-.switch button[aria-pressed="true"].current::after{background:var(--paper)}
-.switch button:focus-visible{outline:2px solid var(--ai);outline-offset:2px}
-.wk-title{margin:0 0 14px;font-size:14px;color:var(--muted)}
-.wk-title b{color:var(--ink);font-weight:700}
-.wk-title .pill{margin-left:6px;vertical-align:1px}
-@media (prefers-reduced-motion:no-preference){nav button{transition:background .15s,color .15s}}
+.check small{display:block;color:var(--dim);font-size:13px}
+.check:has(input:checked) span{text-decoration:line-through;color:var(--dim)}
+.check .x{margin-left:auto;background:none;border:0;color:var(--dim);cursor:pointer;font-size:18px}
+.store-head{display:flex;justify-content:space-between;align-items:baseline;margin:20px 0 4px}
+.store-head h3{margin:0;font-weight:300;font-size:22px}
+.store-head small{color:var(--dim)}
+.inline-add{display:flex;gap:6px;margin:6px 0 0}
+.inline-add input{flex:1;min-width:0}
+form.f{display:grid;gap:12px}
+.f label{display:grid;gap:4px;font-size:13px;color:var(--dim)}
+.f input[type=text],.f input[type=time],.f input[type=date],.f input[type=number],.f select,.f textarea,.inline-add input{background:#111;border:2px solid #555;padding:8px 10px;color:var(--fg);width:100%;border-radius:0}
+.f input:focus,.f select:focus,.f textarea:focus,.inline-add input:focus{outline:none;border-color:var(--fg)}
+.f .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.f .days{display:flex;gap:4px;flex-wrap:wrap}
+.f .days label{display:flex;align-items:center;gap:4px;background:#111;border:2px solid #555;padding:4px 8px;color:var(--fg);font-size:14px}
+.f .seg{display:flex;gap:6px;flex-wrap:wrap}
+.f .seg label{display:flex;align-items:center;gap:6px;color:var(--fg);font-size:14px}
+.note{color:var(--dim);font-size:13px;margin:6px 0}
+.item{display:flex;gap:10px;align-items:flex-start;background:var(--panel);padding:10px 12px;margin:0 0 8px;border-left:4px solid var(--lime)}
+.item .b{min-width:0;flex:1}
+.item b{font-weight:400;font-size:16px;display:block}
+.item small{color:var(--dim);display:block}
+.empty{color:var(--dim);background:var(--panel);padding:16px;margin:0 0 8px}
+.trip{background:var(--panel);padding:10px 12px;margin:0 0 8px;border-left:4px solid var(--amber)}
+.set-grid{display:grid;gap:10px}
+.dayset{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:#000;padding:8px 16px;font-size:14px;z-index:20}
+.sheet{background:var(--panel);padding:14px;margin:0 0 14px}
+.sheet .row-btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+textarea.io{min-height:110px;font-size:12px;font-family:monospace}
+@media (prefers-reduced-motion:reduce){.tile:active{transform:none}}
 </style>
 </head>
 <body>
 
 <div class="wrap">
-  <header>
-    <div class="label">Day plan · Japanese home cooking</div>
-    <h1>Bento Week<span>.</span></h1>
-    <p>Your whole day on one page: shower, chores, work, games, meals and bed. Bedtime steps earlier every 3 days until it reaches 10 PM. A machine runs every other day, laundry one time and the dishwasher the next, and never during the 4–9 PM peak power hours.</p>
-  </header>
 
-  <div class="today" id="today"></div>
-
-  <nav role="tablist" aria-label="Plan sections">
-    <button role="tab" id="t-week" aria-controls="week" aria-selected="true">Week</button>
-    <button role="tab" id="t-prep" aria-controls="prep" aria-selected="false">Monday prep</button>
-    <button role="tab" id="t-recipes" aria-controls="recipes" aria-selected="false">Recipes</button>
-    <button role="tab" id="t-shop" aria-controls="shop" aria-selected="false">Shopping</button>
-  </nav>
-
-  <section id="week" role="tabpanel" aria-labelledby="t-week">
-    <h3>The week</h3>
-    <p class="lead">Cooking starts Monday, Oct 19 with Week A. Four weeks rotate (A, B, C, D), each with different proteins, sides, onigiri and weekend meals, then it starts over. The dot marks this week; tap a letter to see what's coming. Meal times follow your wake-up time in the day plan above.</p>
-    <div class="switch" id="week-switch" role="group" aria-label="Rotation week"></div>
-    <p class="wk-title" id="week-title"></p>
-    <div class="days" id="days"></div>
+  <section class="view" id="v-home">
+    <div class="home-head"><h1>bento<br>week</h1><div class="clock" id="clock"></div></div>
+    <div class="tiles" id="tiles"></div>
   </section>
 
-  <section id="prep" role="tabpanel" aria-labelledby="t-prep" hidden>
-    <h3 id="prep-h">Monday prep</h3>
-    <p class="lead">About 75 minutes. No rice to cook: your microwave rice bowls are shelf-stable, so you only prep the protein, sides and onigiri. It starts half an hour after lunch and finishes before peak power hours begin at 4. Sunday works too if Monday gets busy.</p>
-    <div class="switch" id="prep-switch" role="group" aria-label="Rotation week"></div>
-    <p class="wk-title" id="prep-title"></p>
+  <section class="view" id="v-day" hidden>
+    <div class="page-head"><button class="back" type="button" aria-label="Back">&#8592;</button><h2 id="day-title">today</h2></div>
+    <p class="sub" id="day-sub"></p>
+    <div class="day-meta" id="day-meta"></div>
+    <div class="actions" id="day-actions"></div>
+    <div id="late-sheet"></div>
+    <div class="rows" id="day-rows"></div>
+  </section>
+
+  <section class="view" id="v-cal" hidden>
+    <div class="page-head"><button class="back" type="button" aria-label="Back">&#8592;</button><h2>calendar</h2></div>
+    <div class="cal-nav"><button class="btn" type="button" id="cal-prev" aria-label="Previous month">&#8592;</button><b id="cal-month"></b><button class="btn" type="button" id="cal-next" aria-label="Next month">&#8594;</button></div>
+    <div class="cal" id="cal"></div>
+    <div class="legend">
+      <span style="--c:var(--cobalt)">work</span><span style="--c:var(--purple)">game day</span><span style="--c:var(--teal)">laundry</span>
+      <span style="--c:var(--steel)">dishwasher</span><span style="--c:var(--amber)">trip</span><span style="--c:var(--orange)">meal prep</span><span style="--c:var(--lime)">my items</span>
+    </div>
+    <p class="note">Tap a day to see its full plan.</p>
+  </section>
+
+  <section class="view" id="v-meals" hidden>
+    <div class="page-head"><button class="back" type="button" aria-label="Back">&#8592;</button><h2>meals</h2></div>
+    <p class="sub" id="meals-sub"></p>
+    <div class="pills" id="meal-weeks"></div>
+    <div id="meal-days"></div>
+  </section>
+
+  <section class="view" id="v-prep" hidden>
+    <div class="page-head"><button class="back" type="button" aria-label="Back">&#8592;</button><h2>prep</h2></div>
+    <p class="sub" id="prep-sub"></p>
+    <div class="pills" id="prep-weeks"></div>
     <ol class="steps" id="prep-steps"></ol>
-    <div class="callout"><b>Food safety:</b> cooked meat and salmon keep 3–4 days in the fridge, so Monday's cooking is good through Thursday. Onigiri firm up when cold; 20–30 seconds in the microwave fixes it. Sealed rice bowls stay in the pantry until you open them.</div>
+    <p class="note">Cooked meat and salmon keep 3–4 days in the fridge, so Monday's cooking lasts through Thursday. Onigiri firm up when cold; 20–30 seconds in the microwave fixes it.</p>
   </section>
 
-  <section id="recipes" role="tabpanel" aria-labelledby="t-recipes" hidden>
-    <h3>Core recipes</h3>
-    <p class="lead">Every recipe in the 4-week rotation, built on your microwave rice bowls. Each card says which week uses it.</p>
-    <div class="recipes" id="recipe-list"></div>
+  <section class="view" id="v-recipes" hidden>
+    <div class="page-head"><button class="back" type="button" aria-label="Back">&#8592;</button><h2>recipes</h2></div>
+    <p class="sub">Every recipe in the rotation, built on your microwave rice bowls.</p>
+    <div id="recipe-list"></div>
   </section>
 
-  <section id="shop" role="tabpanel" aria-labelledby="t-shop" hidden>
-    <h3>Shopping list</h3>
-    <p class="lead">Start with what's already in your pantry. Then Costco for rice bowls, protein and frozen meals twice a month, Hardester's in Middletown for weekly produce, and Grocery Outlet for pantry items when they show up. Checkmarks stay on this device.</p>
-    <div class="stores" id="stores"></div>
-    <button class="reset" id="reset" type="button">Clear all checkmarks</button>
+  <section class="view" id="v-shop" hidden>
+    <div class="page-head"><button class="back" type="button" aria-label="Back">&#8592;</button><h2>shopping</h2></div>
+    <p class="sub">Checkmarks stay on this device. Add your own items under any store.</p>
+    <div id="stores"></div>
+    <div class="actions"><button class="btn warn" type="button" id="shop-reset">Clear all checkmarks</button></div>
   </section>
 
-  <footer>Store details from <a href="https://feedam.org/resource/512987">Hardester's Middletown</a>, <a href="https://www.lakeconews.com/news/business/72643-grocery-outlet-opens-newest-store-in-hidden-valley-lake-may-26">Grocery Outlet Hidden Valley Lake</a>, <a href="https://www.thedailymeal.com/2231825/best-japanese-style-foods-costco-2026/">The Daily Meal</a> and <a href="https://www.aol.com/japanese-groceries-buying-costco-one-140100833.html">Food &amp; Wine</a>. Store stock changes, so treat the list as a checklist.</footer>
+  <section class="view" id="v-mine" hidden>
+    <div class="page-head"><button class="back" type="button" aria-label="Back">&#8592;</button><h2>my items</h2></div>
+    <p class="sub">Your own reminders. They show in the day plan and the calendar, and alert like everything else.</p>
+    <form class="f sheet" id="mine-form" autocomplete="off">
+      <input type="hidden" id="mf-id">
+      <label>What<input type="text" id="mf-title" required placeholder="Onsite at the clinic"></label>
+      <label>Note<input type="text" id="mf-note" placeholder="Optional"></label>
+      <div class="two">
+        <label>Time<input type="time" id="mf-time" required value="09:00"></label>
+        <label>Repeats<select id="mf-repeat"><option value="once">Once</option><option value="daily">Every day</option><option value="weekly">Weekly</option></select></label>
+      </div>
+      <label id="mf-date-wrap">Date<input type="date" id="mf-date"></label>
+      <div id="mf-days-wrap" hidden><div class="note">On these days</div><div class="days" id="mf-days"></div></div>
+      <div><div class="note">Alert</div><div class="seg">
+        <label><input type="radio" name="mf-alert" value="notify" checked> Notification</label>
+        <label><input type="radio" name="mf-alert" value="alarm"> Ring like an alarm</label>
+        <label><input type="radio" name="mf-alert" value="silent"> No alert</label>
+      </div></div>
+      <div class="actions" style="margin:0"><button class="btn solid" type="submit" id="mf-save">Add item</button><button class="btn" type="button" id="mf-cancel" hidden>Cancel edit</button></div>
+    </form>
+    <div id="mine-list"></div>
+  </section>
+
+  <section class="view" id="v-settings" hidden>
+    <div class="page-head"><button class="back" type="button" aria-label="Back">&#8592;</button><h2>settings</h2></div>
+    <p class="sub">Changes save right away and update every alert. Settings are separate on your phone and tablet; copy them across at the bottom.</p>
+    <form class="f" id="set-form" autocomplete="off">
+      <div class="sec">sleep</div>
+      <div class="two">
+        <label>Wake up<input type="time" id="s-wake"></label>
+        <label>Lights out<input type="time" id="s-bed"></label>
+      </div>
+      <p class="note" id="s-ramp"></p>
+      <div class="sec">work</div>
+      <div class="two">
+        <label>Starts<input type="time" id="s-ws"></label>
+        <label>Ends<input type="time" id="s-we"></label>
+      </div>
+      <label>Drive to work, minutes<input type="number" id="s-drive" min="0" max="180" step="5"></label>
+      <div class="sec">days of the week</div>
+      <div class="dayset" id="s-days"></div>
+      <div class="sec">power and machines</div>
+      <div class="two">
+        <label>Peak hours start<input type="time" id="s-ps"></label>
+        <label>Peak hours end<input type="time" id="s-pe"></label>
+      </div>
+      <label>Laundry day the cycle counts from<input type="date" id="s-mach"></label>
+      <p class="note">A machine runs every other day: laundry, then the dishwasher two days later, and so on.</p>
+      <div class="sec">meals and dog</div>
+      <label>Bento cooking starts (a Monday)<input type="date" id="s-bento"></label>
+      <div class="seg"><label><input type="checkbox" id="s-dog"> Dog feeding reminders at home</label></div>
+    </form>
+    <div class="sec">trips</div>
+    <p class="note">Away days drop chores and machines and add dog reminders. The leaving day ends with packing and the drive; the coming-home day starts with packing up and the drive back.</p>
+    <div id="trip-list"></div>
+    <form class="f sheet" id="trip-form" autocomplete="off">
+      <input type="hidden" id="tf-id">
+      <label>Trip name<input type="text" id="tf-name" required placeholder="Dog sitting"></label>
+      <div class="two">
+        <label>Leave on<input type="date" id="tf-leave" required></label>
+        <label>Leaving time<input type="time" id="tf-ltime" required value="20:30"></label>
+      </div>
+      <label>Home on<input type="date" id="tf-back" required></label>
+      <div class="seg"><label><input type="checkbox" id="tf-dogs" checked> Dog reminders while away</label></div>
+      <div class="actions" style="margin:0"><button class="btn solid" type="submit" id="tf-save">Add trip</button><button class="btn" type="button" id="tf-cancel" hidden>Cancel edit</button></div>
+    </form>
+    <div class="sec">copy to another device</div>
+    <p class="note">Copy this text on one device and paste it into the box on the other, then tap Load. It carries settings, trips and your items.</p>
+    <textarea class="io" id="io" aria-label="Setup text"></textarea>
+    <div class="actions"><button class="btn" type="button" id="io-copy">Copy my setup</button><button class="btn" type="button" id="io-load">Load pasted setup</button><button class="btn warn" type="button" id="io-reset">Reset settings</button></div>
+  </section>
+
 </div>
 
 <script>
-let TIMES = {work:["10:15 AM","2:30 PM","6:30 PM","10:00 PM"], off:["10:45 AM","2:00 PM","6:30 PM","10:00 PM"]};
-const NAMES = ["Breakfast","Lunch","Dinner","Late snack"];
-const TYPES = ["off","prep","work","work","work","off","off"]; // Sun..Sat
-const DAYNAMES = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-const FILL = "Fill your bento from the prep containers before you leave (about 5 min).";
-// Each week: days indexed Sun..Sat. Sunday dinner makes extra for the NEXT week's Monday lunch.
+/* ---------- Plan data (meal rotation, recipes, stores) ---------- */
 const ROT = [
  {k:"A",name:"Teriyaki chicken & salt salmon",onigiri:"tuna-mayo",
   days:[
@@ -251,232 +336,6 @@ const ROT = [
    ["4:35","Flake the salmon","Flake it with a fork and mix in a few drops of soy for the onigiri filling."],
    ["4:40","Make the sides","Cucumber salad and quick cabbage pickles."]]}
 ];
-const ANCHOR = new Date(2026,9,19); // Monday Oct 19, 2026 = Week A, the first Bento week
-function mondayOf(d){ const m = new Date(d.getFullYear(),d.getMonth(),d.getDate()); m.setDate(m.getDate()-((m.getDay()+6)%7)); return m; }
-const STARTED = mondayOf(new Date())>=ANCHOR;
-const CUR = STARTED ? (((Math.round((mondayOf(new Date())-ANCHOR)/(7*864e5)))%4)+4)%4 : -1;
-let sel = Math.max(CUR,0);
-const TYPE_LABEL = {work:"Work day",off:"Day off",prep:"Prep day"};
-const KIND = ["reset","prep","work","work","work","game","house"]; // Sun..Sat
-const KIND_LABEL = {reset:"Reset day",prep:"Prep day",work:"Work day",house:"House day",game:"Game day"};
-const KIND_PILL = {reset:"off",prep:"prep",work:"work",house:"off",game:"off"};
-const KIND_BLURB = {
-  reset:"The catch-up day. Chores come first, then the rest of the day is yours.",
-  prep:"Groceries and 75 minutes of cooking, all finished before peak hours.",
-  work:"Shower, eat, a 30-minute chore block, then games until you leave. Nothing at home is scheduled between 11:30 AM and 5:30 PM.",
-  house:"Bathroom and kitchen first, then the day is yours.",
-  game:"Shower, eat, 10 minutes of tidying. The rest of the day is games."};
-const CAT = {care:"You",eat:"Eat",house:"House",work:"Work",play:"Play",sleep:"Sleep",peak:"Power"};
-const JOB = {2:"wipe the kitchen counters and stove",3:"clean the bathroom sink, toilet and mirror",4:"sweep or vacuum the main room"};
-const fmt = t=>{ const h=Math.floor(t/60)%24, m=t%60; return ((h+11)%12+1)+":"+String(m).padStart(2,"0")+(h<12?" AM":" PM"); };
-// Sleep steps: wake and lights-out move earlier every 3 days. Minutes from midnight.
-const WAKES = [570,510,450,420], BEDS = [1470,1410,1350,1320];
-// Rows are [minutes, category, title, detail]; {m:n} pulls that meal from the rotation. W = wake, L = lights out.
-function build(i,W,L,bento=true,mach=null,unload=false){
-  const kind = KIND[i], lunch = Math.max(720,W+240);
-  const r = [
-    [W,"care","Wake up","Alarm across the room so you have to stand up. Lights on, drink some water, and go straight to the shower."],
-    [W+10,"care","Shower and clean clothes","First thing, every day. The clothes are already laid out from last night."],
-    [W+45,"eat",{m:0}]];
-  if(kind==="work"){
-    r.push([W+65,"house","Chore block, 30 minutes",`${unload?"Unload the dishwasher, take":"Take"} out any trash, then ${JOB[i]}. Stop when the timer goes.`],
-      [W+95,"house","Pack lunch",bento?"Fill your bento from the prep containers and grab a rice bowl.":"Take a CookUnity meal."]);
-    if(675-(W+105)>=30) r.push([W+105,"play","Games","Free until 11:15."]);
-    if(mach==="L") r.push([W+5,"house","Start one laundry load","Before the shower, so it washes while you get ready."],
-      [W+60,"house","Laundry to the dryer","Right after breakfast."],
-      [W+125,"house","Fold laundry","Put it away as you fold."]);
-    r.push([690,"work","Leave for work","A 15–30 minute drive."],
-      [720,"work","Work, 12:00–5:00",bento?"Lunch is your bento, around 2:30.":"Lunch around 2:30."],
-      [870,"eat",{m:1}],
-      [1020,"work","Off work, head home","If work runs late, nothing below has to move. Dinner starts when you're home."],
-      [1050,"peak","Peak power hours until 9:00 PM","They started at 4 while you were at work. No washer, dryer or dishwasher tonight."]);
-  } else {
-    r.push([lunch,"eat",{m:1}],[960,"peak","Peak power hours until 9:00 PM","No washer, dryer or dishwasher. A good time for games."]);
-    if(unload) r.push([W+60,"house","Unload the dishwasher","It ran last night."]);
-    if(mach==="L") r.push([W+195,"house","Start one laundry load","One load: whatever is fullest, clothes or sheets and towels."],
-      [lunch+(kind==="prep"&&bento?25:30),"house","Laundry to the dryer","It has to finish before 4."],
-      [lunch+105,"house","Fold laundry","Put it away as you fold."]);
-    if(kind==="reset"){ r.push(
-      [W+75,"house","Trash sweep","One bag, every room, floor first. 20 minutes, then take the bag out."],
-      [W+100,"house","Dishes","Load the dishwasher and hand-wash what doesn't fit. 20 minutes."],
-      [W+130,"play","Break","30 minutes of games. Set a timer."],
-      [W+170,"house","Counters and stove","Clear them, wipe them. 15 minutes."],
-      [lunch+40,"house","Floors","Sweep or vacuum the main room. 20 minutes."]);
-      if(mach!=="L") r.push([lunch+65,"play","Done","Housework is over for the day."]); }
-    if(kind==="prep") r.push([W+75,"house","Tidy, trash and recycling out","15 minutes. Floor first, then the bins."]);
-    if(kind==="prep"&&bento) r.push(
-      [W+105,"house","Hardester's run","This week's produce. The list is in the Shopping tab."],
-      [lunch+30,"house","Meal prep, 75 minutes","Steps are in the Monday prep tab."],
-      [lunch+110,"house","Stack the prep dishes","Into the dishwasher. Hand-wash the pans."]);
-    if(kind==="house") r.push(
-      [W+90,"house","Bathroom","Shower, toilet, sink, floor. 30 minutes."],
-      [W+120,"house","Kitchen","Counters, stove, old food out of the fridge. 25 minutes."],
-      [W+165,"play","Free time",mach==="L"?"Only the laundry is left.":"Housework is done for the day."]);
-    if(kind==="game") r.push(
-      [W+65,"house","10-minute tidy","Trash and dishes only. That's all the housework today."],
-      [W+80,"play","Game day","All yours until bed."]);
-  }
-  r.push([1110,"eat",{m:2}],
-    [1140,"play","Games","Nothing in the house needs to run right now."],
-    [Math.min(L-120,1320),"eat",{m:3}],
-    mach==="D" ? [1260,"house","Run the dishwasher","Peak is over. Start it, then wipe the counter. 10 minutes."]
-               : [1260,"house","Rinse and load the dishwasher","It only runs on dishwasher days. Wipe the counter. 5 minutes."]);
-  if(L-45-1275>=30) r.push([1275,"play","Free time","Games, shows, whatever you want."]);
-  r.push([L-45,"care","Wind down",`Lay out tomorrow's clothes and brush your teeth. Games and the PC off at ${fmt(L-30)}.`],
-    [L-30,"sleep","In bed, YouTube on","Queue a long SCP or gaming video. Brightness down, screen turned away, autoplay off or a sleep timer set so it stops by itself."],
-    [L,"sleep","Lights out","Let the video run and just listen. Same time every night, so getting up gets easier."]);
-  return r.sort((a,b)=>a[0]-b[0]);
-}
-// Machines alternate: a machine runs every other day, laundry then dishwasher, so each runs once every 4 days.
-const MACH_START = Date.UTC(2026,9,5); // Mon Oct 5, 2026 = laundry day
-// Dog-sitting trip: away Fri Oct 9 to Mon Oct 12, drive home Tue Oct 13. No machines while away;
-// the cycle restarts with laundry on Wed Oct 14, the first day back.
-const AWAY_FROM = Date.UTC(2026,9,9), AWAY_TO = Date.UTC(2026,9,13), MACH_RESTART = Date.UTC(2026,9,14);
-const utcDay = d=>Date.UTC(d.getFullYear(),d.getMonth(),d.getDate());
-const DEPART = Date.UTC(2026,9,8); // Thu Oct 8: work, home to pack, leave in the evening
-const tripFor = d=>{ const u = utcDay(d); return u===DEPART ? "depart" : u>=AWAY_FROM&&u<AWAY_TO ? "away" : u===AWAY_TO ? "travel" : null; };
-const machineFor = d=>{ const u = utcDay(d); if(u>=AWAY_FROM&&u<=AWAY_TO) return null;
-  const n = Math.round((u-(u>=MACH_RESTART?MACH_RESTART:MACH_START))/864e5), m = ((n%4)+4)%4; return m===0?"L":m===2?"D":null; };
-function buildTrip(W,L,trip){
-  const lunch = Math.max(720,W+240);
-  const r = [
-    [W,"care","Wake up","Change into clean clothes. No shower needed while you're away."],
-    [W+15,"house","Dogs: breakfast and a walk","Feed both dogs, fresh water, then a walk."],
-    [W+45,"eat",{m:0}]];
-  if(trip==="away"){
-    r.push([lunch,"eat",{m:1}],
-      [lunch+15,"house","Dogs: let them out","Quick potty break and a water check."],
-      [1050,"house","Dogs: dinner and a walk","Feed both dogs, then an evening walk."],
-      [1110,"eat",{m:2}],
-      [1140,"play","Games","Laptop time. Nothing else needs doing."],
-      [L-60,"house","Dogs: last trip outside","Then everyone settles in for the night."]);
-    if(L-45-1275>=30) r.push([1275,"play","Free time","Games, shows, whatever you want."]);
-  } else {
-    r.push([W+60,"work","Tell work when you'll get in","Send a quick message with your arrival time."],
-      [W+75,"house","Pack up","Your things, both dogs' food and bowls, chargers, the laptop."],
-      [W+105,"house","Hand off the house","Last walk and water for the dog you're sitting, then lock up."],
-      [W+120,"work","Drive home","Go straight to work when you get in."],
-      [720,"work","Work, 12:00–5:00","Arriving late today. Lunch when you can."],
-      [870,"eat",{m:1}],
-      [1020,"work","Off work, head home","Dinner starts when you're home."],
-      [1050,"house","Feed your dog","Dinner and fresh water."],
-      [1110,"eat",{m:2}],
-      [1140,"house","Unpack","Dirty clothes in the hamper. Laundry runs tomorrow."],
-      [1170,"play","Games","Nothing else needs doing tonight."],
-      [1260,"house","Rinse and load the dishwasher","It only runs on dishwasher days. Wipe the counter. 5 minutes."]);
-  }
-  r.push([L-45,"care","Wind down",`Brush your teeth and lay out tomorrow's clothes. Laptop off at ${fmt(L-30)}.`],
-    [L-30,"sleep","In bed, YouTube on","Queue a long SCP or gaming video. Brightness down, screen turned away, autoplay off or a sleep timer set so it stops by itself."],
-    [L,"sleep","Lights out","Let the video run and just listen. Same time every night, so getting up gets easier."]);
-  return r.sort((a,b)=>a[0]-b[0]);
-}
-// Final rows for a date: [minutes, category, title, text], with meal text filled in.
-function itemsFor(date){
-  const i = date.getDay(), kind = KIND[i], st = stageFor(date), W = WAKES[st], L = BEDS[st];
-  const w = ROT[weekFor(date)], bento = date>=ANCHOR, trip = tripFor(date);
-  const yest = new Date(date); yest.setDate(yest.getDate()-1);
-  const rows = trip==="depart" ? build(i,W,L,bento,machineFor(date),machineFor(yest)==="D").filter(r=>r[0]<1020).concat([
-      [1020,"work","Off work, head home","If the onsite runs long, everything below just slides later."],
-      [1050,"house","Pack","Clothes for 5 days, chargers, the laptop, and your dog's food, bowls and leash."],
-      [1110,"eat",{m:2}],
-      [1170,"house","Load the car","Bags, dog stuff, laptop. Check the stove and lights, then lock up."],
-      [1230,"care","Leave for the trip","About 2 to 2½ hours. Take your dog out right before you go."],
-      [1380,"house","Arrive and settle the dogs","Water, a quick walk, and show them where to sleep."],
-      [1425,"sleep","In bed, YouTube on","Queue a long SCP or gaming video. Brightness down, screen turned away, autoplay off or a sleep timer set so it stops by itself."],
-      [1455,"sleep","Lights out","Late night tonight. Tomorrow starts at the normal time."]])
-    : trip ? buildTrip(W,L,trip) : build(i,W,L,bento,machineFor(date),machineFor(yest)==="D");
-  return rows.filter(r=>bento||typeof r[2]!=="object"||r[2].m!==3).map(r=>{
-    if(typeof r[2]!=="object") return r;
-    const m = r[2].m;
-    const text = trip==="depart" ? (m===1 ? "CookUnity meal." : m===2 ? "Eat before you leave." : "CookUnity meal or whatever's on hand.") : trip ? (trip==="travel"&&m===1 ? "Grab something on the road or at work." : "Whatever's on hand.")
-      : bento ? w.days[i][m] : (kind==="work"&&m===1 ? "CookUnity meal." : "CookUnity meal or whatever's on hand.");
-    return [r[0],r[1],NAMES[m],text];
-  }).filter(r=>r[3]!=="—");
-}
-// END-PLAN-DATA
-const NOW = new Date(), TODAY = NOW.getDay();
-const SLEEP_START = new Date(2026,9,4); // step 1 begins Sun Oct 4, 2026
-const dayOnly = d=>new Date(d.getFullYear(),d.getMonth(),d.getDate());
-const dateFor = i=>{ const d = dayOnly(NOW); d.setDate(d.getDate()+((i-TODAY+7)%7)); return d; };
-const stageFor = d=>Math.max(0,Math.min(3,Math.floor(Math.round((dayOnly(d)-SLEEP_START)/864e5)/3)));
-const weekFor = d=>(((Math.round((mondayOf(d)-ANCHOR)/(7*864e5)))%4)+4)%4;
-const nice = d=>d.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"});
-{ const W0 = WAKES[stageFor(NOW)];
-  TIMES = {work:[fmt(W0+45),"2:30 PM","6:30 PM","Evening"], off:[fmt(W0+45),fmt(Math.max(720,W0+240)),"6:30 PM","Evening"]}; }
-let selDay = TODAY;
-const dayKey = "bento-day-"+NOW.getFullYear()+"-"+(NOW.getMonth()+1)+"-"+NOW.getDate();
-let dayDone = {};
-try{ dayDone = JSON.parse(localStorage.getItem(dayKey)||"{}"); }catch(e){ dayDone = {}; }
-
-function renderToday(){
-  const i = selDay, isToday = i===TODAY, kind = KIND[i], date = dateFor(i), st = stageFor(date), w = ROT[weekFor(date)];
-  const W = WAKES[st], L = BEDS[st], nowMin = NOW.getHours()*60+NOW.getMinutes();
-  const bento = date>=ANCHOR;
-  const mach = machineFor(date), yest = new Date(date); yest.setDate(yest.getDate()-1);
-  const items = itemsFor(date), trip = tripFor(date);
-  const label = trip==="depart" ? "Work, then the trip" : trip==="away" ? "Away: dog sitting" : trip==="travel" ? "Travel day" : !bento&&kind==="prep" ? "Day off" : KIND_LABEL[kind];
-  const pillCls = trip==="travel"||trip==="depart" ? "work" : trip ? "off" : !bento&&kind==="prep" ? "off" : KIND_PILL[kind];
-  const blurb = trip==="depart" ? "Work as normal, then home to pack and on the road around 8:30 PM. No machines tonight." : trip==="away" ? "No chores and no machines. Look after the dogs, eat, game, and keep the sleep times." : trip==="travel" ? "Drive home and head to work, arriving late. Unpack tonight; laundry runs tomorrow." : !bento&&kind==="prep" ? "A quick tidy. Shopping and meal prep start Monday, Oct 19." : KIND_BLURB[kind];
-  let nowIdx = -1; if(isToday) items.forEach((r,k)=>{ if(r[0]<=nowMin) nowIdx = k; });
-  const total = items.filter(r=>r[1]!=="peak").length, done = items.filter((r,k)=>r[1]!=="peak"&&dayDone[k]).length;
-  const rows = items.map((r,k)=>{
-    const body = `<span class="t">${fmt(r[0])}</span><span class="b"><span class="cat">${CAT[r[1]]}</span><b>${r[2]}</b><span class="d">${r[3]}</span></span>`;
-    if(r[1]==="peak") return `<div class="row peak">${body}</div>`;
-    const cls = `row c-${r[1]}${k===nowIdx?" is-now":""}`;
-    return isToday ? `<label class="${cls}">${body}<input type="checkbox" id="dp-${k}" data-dp="${k}"${dayDone[k]?" checked":""} aria-label="Done: ${r[2]}"></label>` : `<div class="${cls}">${body}</div>`;
-  }).join("");
-  const letters = [1,2,3,4,5,6,0].map(n=>`<button type="button" data-d="${n}" aria-pressed="${n===i}" class="${n===TODAY?"current":""}" aria-label="${DAYNAMES[n]}${n===TODAY?" (today)":""}">${DAYNAMES[n][0]}</button>`).join("");
-  const next = new Date(SLEEP_START); next.setDate(next.getDate()+(st+1)*3);
-  const sleep = `Sleep step ${st+1} of 4: up at ${fmt(W)}, lights out at ${fmt(L)}.` + (st<3?` Both move earlier on ${nice(next)}.`:"");
-  document.getElementById("today").innerHTML =
-    `<div class="today-head"><div><div class="label">${isToday?"Today":nice(date)} · ${bento?`Week ${w.k} meals`:"Bento Week starts Oct 19"}</div><h2>${DAYNAMES[i]}</h2></div>
-       <div>${isToday?`<span class="done-count" id="done-count">${done} / ${total} done</span> `:""}<span class="pill ${pillCls}">${label}</span></div></div>
-     <div class="switch" id="day-switch" role="group" aria-label="Day of the week">${letters}</div>
-     <p class="kind-blurb">${blurb}<br>${mach==="L"?"Machine today: laundry, one load.":mach==="D"?"Machine today: the dishwasher, at 9:00 PM.":"No machines today."} ${sleep}</p>
-     <div class="plan">${rows}</div>`;
-}
-document.getElementById("today").addEventListener("change", e=>{
-  const k = e.target.dataset.dp; if(k===undefined) return;
-  dayDone[k] = e.target.checked;
-  try{ localStorage.setItem(dayKey, JSON.stringify(dayDone)); }catch(err){}
-  const boxes = [...document.querySelectorAll("#today input[data-dp]")];
-  const c = document.getElementById("done-count"); if(c) c.textContent = `${boxes.filter(b=>b.checked).length} / ${boxes.length} done`;
-});
-function renderSwitches(){
-  ["week-switch","prep-switch"].forEach(id=>{
-    document.getElementById(id).innerHTML = ROT.map((w,i)=>
-      `<button type="button" data-i="${i}" aria-pressed="${i===sel}" class="${i===CUR?"current":""}" aria-label="Week ${w.k}${i===CUR?" (this week)":""}">${w.k}</button>`).join("");
-  });
-  const w = ROT[sel], badge = sel===CUR?`<span class="pill work">This week</span>`:sel===(CUR+1)%4?`<span class="pill off">Next week</span>`:"";
-  document.getElementById("week-title").innerHTML = `<b>Week ${w.k}:</b> ${w.name} ${badge}`;
-  document.getElementById("prep-title").innerHTML = `<b>Week ${w.k}:</b> ${w.name} ${badge}`;
-}
-function renderWeek(){
-  const today = new Date().getDay(), w = ROT[sel];
-  document.getElementById("days").innerHTML = [1,2,3,4,5,6,0].map(i=>{
-    const type = TYPES[i], t = TIMES[type==="work"?"work":"off"];
-    return `<div class="day${i===today&&sel===CUR?" is-today":""}"><div class="day-top"><b>${DAYNAMES[i]}</b><span class="pill ${type}">${TYPE_LABEL[type]}</span></div>
-      <div class="meals">${w.days[i].map((f,k)=>`<div><small>${NAMES[k]} · ${t[k]}</small>${f}</div>`).join("")}</div></div>`;
-  }).join("");
-}
-const PREP_DATE = dateFor(1)>=ANCHOR ? dateFor(1) : ANCHOR;
-const PREP_START = Math.max(720, WAKES[stageFor(PREP_DATE)]+240)+30;
-const shift = t=>{ const [h,m] = t.split(":").map(Number); return fmt(h*60+m-240+PREP_START); };
-function renderPrep(){
-  const w = ROT[sel];
-  document.getElementById("prep-h").textContent = `Monday prep, ${fmt(PREP_START)}–${fmt(PREP_START+75)}`;
-  const steps = [["4:00","Boil 6 eggs","6½ minutes, ice bath, peel, into the marinade. Ready by Tuesday morning."], ...w.prep,
-    ["4:55","Shape 6 onigiri",`Microwave 3 rice bowls, cool 2 minutes, press 2 per bowl in your kit's triangle molds. ${w.onigiri[0].toUpperCase()+w.onigiri.slice(1)} filling. Wrap each in plastic.`],
-    ["5:05","Portion into prep containers","Divide the proteins and sides into small containers. Each workday morning, fill your bento from them, take a sealed rice bowl, and wash the bento when you get home."]];
-  document.getElementById("prep-steps").innerHTML = steps.map(s=>`<li><span class="t">${shift(s[0])}</span><span><b>${s[1]}</b>${s[2]}</span></li>`).join("");
-}
-function renderRotation(){ renderSwitches(); renderWeek(); renderPrep(); }
-document.addEventListener("click", e=>{
-  const b = e.target.closest(".switch button"); if(!b) return;
-  if(b.dataset.d!==undefined){ selDay = +b.dataset.d; renderToday(); return; }
-  sel = +b.dataset.i; renderRotation();
-});
-
 const RECIPES = [
   {n:"Teriyaki sauce",jp:"照り焼き",ing:["½ cup soy sauce","¼ cup mirin","2 tbsp sugar or honey","1 tbsp grated ginger, 2 garlic cloves"],how:"Simmer 3 minutes until slightly thick. Enough for 2 lb chicken or 3 salmon portions.",uses:"Week A chicken, Week C salmon, Week D chicken"},
   {n:"Marinated eggs",jp:"味玉 ajitama",ing:["½ cup soy sauce","½ cup water","¼ cup mirin","1 tbsp sugar"],how:"Soak peeled 6½-minute eggs at least 6 hours, up to 4 days.",uses:"Workday breakfast, ramen"},
@@ -497,9 +356,6 @@ const RECIPES = [
   {n:"Easy add-ons",jp:"すぐできる",ing:["Curry rice from a roux block (box directions, 6–8 servings)","Kimchi fried rice bowl + a fried egg on top","Shrimp donburi: tempura or panko shrimp over a rice bowl with egg"],how:"",uses:"Fri–Sun"},
   {n:"Sushi night",jp:"巻き寿司",ing:["Your SmileTools kit: mats, bazooka, nigiri and gunkan molds","Nori, rice vinegar, sugar, salt","2 rice bowls per roll, seasoned with 1 tbsp vinegar + 1 tsp sugar","Fillings: tuna-mayo, cucumber, avocado, Kirkland salmon"],how:"Your sticky medium-grain bowls work for simple rolls. Costco's frozen Kirkland salmon is commonly used raw at home, since it's farmed and frozen to safe standards. Start with cooked fillings if you'd rather not.",uses:"A weekend project"}
 ];
-document.getElementById("recipe-list").innerHTML = RECIPES.map(r=>
-  `<div class="recipe"><h4>${r.n}</h4><div class="jp">${r.jp}</div><ul>${r.ing.map(x=>`<li>${x}</li>`).join("")}</ul>${r.how?`<p>${r.how}</p>`:""}<div class="uses">Used for: ${r.uses}</div></div>`).join("");
-
 const STORES = [
   {id:"pantry",n:"Already in your pantry",when:"Use these first",items:[
     ["Sushi kit (SmileTools 30-in-1)","Onigiri, musubi, nigiri molds + cucumber slicer"],
@@ -536,52 +392,529 @@ const STORES = [
     ["Small prep containers, 6–9","For portioning Monday's cooking"],
     ["Cooler bag and ice","Only if you buy anything cold or frozen"]]}
 ];
-let saved = {};
-try{ saved = JSON.parse(localStorage.getItem("bento-checks")||"{}"); }catch(e){ saved = {}; }
-function persist(){ try{ localStorage.setItem("bento-checks", JSON.stringify(saved)); }catch(e){} }
-function renderStores(){
-  document.getElementById("stores").innerHTML = STORES.map(s=>{
-    const done = s.items.filter((_,k)=>saved[s.id+k]).length;
-    return `<div class="store"><div class="store-head"><div><h4>${s.n}</h4><div class="label">${s.when}</div></div><span class="count" id="c-${s.id}">${done} / ${s.items.length}</span></div>
-      ${s.items.map((it,k)=>`<label class="check"><input type="checkbox" id="ck-${s.id}-${k}" data-key="${s.id+k}" data-store="${s.id}"${saved[s.id+k]?" checked":""}><span>${it[0]}${it[1]?`<small>${it[1]}</small>`:""}</span></label>`).join("")}</div>`;
-  }).join("");
-}
-document.getElementById("stores").addEventListener("change", e=>{
-  const el = e.target; if(!el.dataset.key) return;
-  saved[el.dataset.key] = el.checked; persist();
-  const s = STORES.find(x=>x.id===el.dataset.store);
-  document.getElementById("c-"+s.id).textContent = `${s.items.filter((_,k)=>saved[s.id+k]).length} / ${s.items.length}`;
-});
-document.getElementById("reset").addEventListener("click", ()=>{ saved = {}; persist(); renderStores(); });
 
-const tabs = [...document.querySelectorAll('[role="tab"]')];
-function show(id){
-  tabs.forEach(t=>{ const on = t.getAttribute("aria-controls")===id; t.setAttribute("aria-selected", on); document.getElementById(t.getAttribute("aria-controls")).hidden = !on; });
-  try{ localStorage.setItem("bento-tab", id); }catch(e){}
+/* ---------- Helpers ---------- */
+const svg = p=>`<svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
+const ICON = {
+  wash: svg('<rect x="4" y="3" width="16" height="18"/><circle cx="12" cy="13" r="5"/><path d="M7 6h2"/>'),
+  dish: svg('<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/>'),
+  none: svg('<path d="M6 12h12"/>'),
+  knife: svg('<path d="M4 20 18 6c1.5-1.5 3 0 1.5 1.5L9 18"/><path d="M4 20l3-1"/>'),
+  onigiri: svg('<path d="M12 3 21 19H3z"/><path d="M8.5 13h7v6h-7z"/>'),
+  gear: svg('<circle cx="12" cy="12" r="3.2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/>')
+};
+
+const NAMES = ["Breakfast","Lunch","Dinner","Late snack"];
+const DAYNAMES = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+const KINDS = {reset:"Reset day",prep:"Prep day",work:"Work day",house:"House day",game:"Game day",off:"Day off"};
+const JOB = {2:"wipe the kitchen counters and stove",3:"clean the bathroom sink, toilet and mirror",4:"sweep or vacuum the main room"};
+const pad = n=>String(n).padStart(2,"0");
+const ymd = d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+const parseYmd = s=>{ const [y,m,d] = String(s).split("-").map(Number); return new Date(y,(m||1)-1,d||1); };
+const dayOnly = d=>new Date(d.getFullYear(),d.getMonth(),d.getDate());
+const addDays = (d,n)=>{ const x = dayOnly(d); x.setDate(x.getDate()+n); return x; };
+const daysBetween = (a,b)=>Math.round((Date.UTC(b.getFullYear(),b.getMonth(),b.getDate())-Date.UTC(a.getFullYear(),a.getMonth(),a.getDate()))/864e5);
+const fmt = t=>{ t = Math.round(t); const h = Math.floor(t/60)%24, m = ((t%60)+60)%60; return ((h+11)%12+1)+":"+pad(m)+(h<12?" AM":" PM"); };
+const toMin = s=>{ const [h,m] = String(s||"0:0").split(":").map(Number); return (h||0)*60+(m||0); };
+const toHHMM = t=>pad(Math.floor(t/60)%24)+":"+pad(t%60);
+const nice = d=>d.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"});
+const esc = s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const uid = ()=>Math.random().toString(36).slice(2,9);
+function load(k,def){ try{ const v = localStorage.getItem(k); return v==null ? def : JSON.parse(v); }catch(e){ return def; } }
+function store(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
+
+/* ---------- Settings and user data ---------- */
+const DEFAULTS = {
+  wake:420, bed:1320,
+  days:["reset","prep","work","work","work","game","house"],
+  workStart:720, workEnd:1020, drive:30,
+  peakStart:960, peakEnd:1260,
+  machineStart:"2026-10-14", bentoStart:"2026-10-19", dogsAtHome:false,
+  trips:[{id:"dogsit",name:"Dog sitting",leave:"2026-10-08",leaveTime:1230,back:"2026-10-13",dogs:true}]
+};
+let CFG = Object.assign({}, DEFAULTS, load("bw-settings",{}));
+let ITEMS = load("bw-items",[]);
+let LATE = load("bw-late",{});
+let SHOPX = load("bw-shop-extra",{});
+let CHECKS = load("bento-checks",{});
+const saveCfg = ()=>{ store("bw-settings",CFG); afterChange(); };
+const saveItems = ()=>{ store("bw-items",ITEMS); afterChange(); };
+
+/* The bedtime ramp that started Oct 4 steps down every 3 days, then your settings take over. */
+const RAMP = [["2026-10-06",570,1470],["2026-10-09",510,1410],["2026-10-12",450,1350]];
+function sleepFor(date){
+  const k = ymd(date);
+  for(const [until,w,b] of RAMP) if(k>=("2026-10-04") && k<=until) return {W:Math.min(w,Math.max(w,CFG.wake)),L:b,ramp:true};
+  return {W:CFG.wake,L:CFG.bed<=360?CFG.bed+1440:CFG.bed,ramp:false};
 }
-tabs.forEach(t=>t.addEventListener("click", ()=>show(t.getAttribute("aria-controls"))));
-renderToday(); renderRotation(); renderStores();
-let start = location.hash.slice(1);
-if(!["week","prep","recipes","shop"].includes(start)){ try{ start = localStorage.getItem("bento-tab")||"week"; }catch(e){ start = "week"; } }
-show(start);
-// Android app bridge: when this page runs inside the Bento Week app, hand it the next 45 days of steps so it can alert on its own.
-function appSchedule(){
+function tripFor(date){
+  const k = ymd(date);
+  for(const t of CFG.trips){
+    if(k===t.leave) return {type:"depart",trip:t};
+    if(k>t.leave && k<t.back) return {type:"away",trip:t};
+    if(k===t.back) return {type:"back",trip:t};
+  }
+  return null;
+}
+function machineFor(date){
+  const t = tripFor(date); if(t) return null;
+  const start = parseYmd(CFG.machineStart);
+  const base = dayOnly(date)>=start ? start : new Date(2026,9,5);
+  const m = ((daysBetween(base,date)%4)+4)%4;
+  return m===0?"L":m===2?"D":null;
+}
+function bentoOn(date){ return dayOnly(date)>=parseYmd(CFG.bentoStart); }
+function weekFor(date){
+  const s = parseYmd(CFG.bentoStart), mon = addDays(date,-((date.getDay()+6)%7)), smon = addDays(s,-((s.getDay()+6)%7));
+  return ((Math.round(daysBetween(smon,mon)/7)%4)+4)%4;
+}
+function kindFor(date){ return CFG.days[date.getDay()]||"off"; }
+
+/* ---------- Building a day ---------- */
+// Rows: [minutes, category, title, text, alert]. alert: "alarm" | "notify" | "silent".
+function baseDay(date){
+  const i = date.getDay(), kind = kindFor(date), {W,L} = sleepFor(date), bento = bentoOn(date);
+  const mach = machineFor(date), unload = machineFor(addDays(date,-1))==="D";
+  const lunch = Math.max(720,W+240), leave = CFG.workStart-CFG.drive, ps = CFG.peakStart, pe = CFG.peakEnd;
+  const r = [
+    [W,"care","Wake up","Alarm across the room so you have to stand up. Lights on, drink some water, and go straight to the shower.","alarm"],
+    [W+10,"care","Shower and clean clothes","First thing, every day. The clothes are already laid out from last night."],
+    [W+45,"eat",{m:0}]];
+  if(CFG.dogsAtHome) r.push([W+20,"dog","Feed your dog","Breakfast and fresh water."],[1080,"dog","Feed your dog","Dinner and fresh water."]);
+  if(kind==="work"){
+    r.push([W+65,"house","Chore block, 30 minutes",`${unload?"Unload the dishwasher, take":"Take"} out any trash, then ${JOB[i]||"tidy one room"}. Stop when the timer goes.`],
+      [W+95,"house","Pack lunch",bento?"Fill your bento from the prep containers and grab a rice bowl.":"Take a CookUnity meal."]);
+    if(leave-15-(W+105)>=30) r.push([W+105,"play","Games",`Free until ${fmt(leave-15)}.`]);
+    if(mach==="L") r.push([W+5,"house","Start one laundry load","Before the shower, so it washes while you get ready."],[W+60,"house","Laundry to the dryer","Right after breakfast."],[W+125,"house","Fold laundry","Put it away as you fold."]);
+    r.push([leave,"work","Leave for work",CFG.drive?`A ${CFG.drive}-minute drive.`:"Time to go.","alarm"],
+      [CFG.workStart,"work",`Work, ${fmt(CFG.workStart).replace(/ [AP]M/,"")}–${fmt(CFG.workEnd)}`,bento?"Lunch is your bento.":"Lunch is a CookUnity meal."],
+      [CFG.workStart+150,"eat",{m:1}],
+      [CFG.workEnd,"work","Off work, head home","If work runs late, use Running late to push the evening back."]);
+    if(CFG.workEnd+30<pe) r.push([Math.max(ps,CFG.workEnd+30),"peak","Peak power hours until "+fmt(pe),"No washer, dryer or dishwasher tonight."]);
+  } else {
+    r.push([lunch,"eat",{m:1}],[ps,"peak","Peak power hours until "+fmt(pe),"No washer, dryer or dishwasher. A good time for games."]);
+    if(unload) r.push([W+60,"house","Unload the dishwasher","It ran last night."]);
+    if(mach==="L") r.push([W+195,"house","Start one laundry load","One load: whatever is fullest, clothes or sheets and towels."],
+      [lunch+(kind==="prep"&&bento?25:30),"house","Laundry to the dryer","It has to finish before peak hours."],[lunch+105,"house","Fold laundry","Put it away as you fold."]);
+    if(kind==="reset"){ r.push(
+      [W+75,"house","Trash sweep","One bag, every room, floor first. 20 minutes, then take the bag out."],
+      [W+100,"house","Dishes","Load the dishwasher and hand-wash what doesn't fit. 20 minutes."],
+      [W+130,"play","Break","30 minutes of games. Set a timer."],
+      [W+170,"house","Counters and stove","Clear them, wipe them. 15 minutes."],
+      [lunch+40,"house","Floors","Sweep or vacuum the main room. 20 minutes."]);
+      if(mach!=="L") r.push([lunch+65,"play","Done","Housework is over for the day."]); }
+    if(kind==="prep") r.push([W+75,"house","Tidy, trash and recycling out","15 minutes. Floor first, then the bins."]);
+    if(kind==="prep"&&bento) r.push(
+      [W+105,"house","Hardester's run","This week's produce. The list is in Shopping."],
+      [lunch+30,"house","Meal prep, 75 minutes","Steps are in Prep."],
+      [lunch+110,"house","Stack the prep dishes","Into the dishwasher. Hand-wash the pans."]);
+    if(kind==="house") r.push(
+      [W+90,"house","Bathroom","Shower, toilet, sink, floor. 30 minutes."],
+      [W+120,"house","Kitchen","Counters, stove, old food out of the fridge. 25 minutes."],
+      [W+165,"play","Free time",mach==="L"?"Only the laundry is left.":"Housework is done for the day."]);
+    if(kind==="game") r.push([W+65,"house","10-minute tidy","Trash and dishes only. That's all the housework today."],[W+80,"play","Game day","All yours until bed."]);
+  }
+  r.push([1110,"eat",{m:2}],[1140,"play","Games","Nothing in the house needs to run right now."],[Math.min(L-120,1320),"eat",{m:3}],
+    mach==="D" ? [pe,"house","Run the dishwasher","Peak is over. Start it, then wipe the counter. 10 minutes."]
+               : [pe,"house","Rinse and load the dishwasher","It only runs on dishwasher days. Wipe the counter. 5 minutes."]);
+  if(L-45-(pe+15)>=30) r.push([pe+15,"play","Free time","Games, shows, whatever you want."]);
+  r.push(...bedRows(L));
+  return r;
+}
+function bedRows(L,laptop){
+  return [[L-45,"care","Wind down",`Lay out tomorrow's clothes and brush your teeth. ${laptop?"Laptop":"Games and the PC"} off at ${fmt(L-30)}.`,"alarm"],
+    [L-30,"sleep","In bed, YouTube on","Queue a long SCP or gaming video. Brightness down, screen turned away, autoplay off or a sleep timer set so it stops by itself."],
+    [L,"sleep","Lights out","Let the video run and just listen. Same time every night, so getting up gets easier."]];
+}
+function tripDay(date,tt){
+  const {W,L} = sleepFor(date), t = tt.trip, work = kindFor(date)==="work";
+  if(tt.type==="depart"){
+    const lt = t.leaveTime, packAt = work ? Math.max(CFG.workEnd+30, lt-180) : lt-180;
+    const r = baseDay(date).filter(x=>x[0] < (work ? CFG.workEnd : packAt) && x[1]!=="peak");
+    if(work) r.push([CFG.workEnd,"work","Off work, head home","If work runs long, use Running late to push the rest back."]);
+    const arrive = lt+150;
+    r.push([packAt,"house","Pack","Clothes for the trip, chargers, the laptop"+(t.dogs?", and your dog's food, bowls and leash.":".")],
+      [lt-120,"eat",{m:2}],
+      [lt-60,"house","Load the car","Bags, laptop"+(t.dogs?", dog stuff":"")+". Check the stove and lights, then lock up."],
+      [lt,"care","Leave for the trip",t.dogs?"Take your dog out right before you go.":"Drive safe.","alarm"],
+      [arrive,"house","Arrive and settle in",t.dogs?"Water, a quick walk, and show the dogs where to sleep.":"Unload and get settled."],
+      [Math.max(L-30,arrive+45),"sleep","In bed, YouTube on","Queue a long SCP or gaming video. Sleep timer on."],
+      [Math.max(L,arrive+75),"sleep","Lights out","Late night tonight. Tomorrow starts at the normal time."]);
+    return r;
+  }
+  const lunch = Math.max(720,W+240);
+  const r = [[W,"care","Wake up","Change into clean clothes. No shower needed while you're away.","alarm"],[W+45,"eat",{m:0}]];
+  if(t.dogs) r.push([W+15,"dog","Dogs: breakfast and a walk","Feed both dogs, fresh water, then a walk."]);
+  if(tt.type==="away"){
+    r.push([lunch,"eat",{m:1}],[1110,"eat",{m:2}],[1140,"play","Games","Laptop time. Nothing else needs doing."]);
+    if(t.dogs) r.push([lunch+15,"dog","Dogs: let them out","Quick potty break and a water check."],[1050,"dog","Dogs: dinner and a walk","Feed both dogs, then an evening walk."],[L-60,"dog","Dogs: last trip outside","Then everyone settles in for the night."]);
+    if(L-45-1275>=30) r.push([1275,"play","Free time","Games, shows, whatever you want."]);
+    r.push(...bedRows(L,true));
+    return r;
+  }
+  r.push([W+75,"house","Pack up","Your things, chargers, the laptop"+(t.dogs?", and both dogs' food and bowls.":".")],
+    [W+120,"care","Drive home",work?"Go straight to work when you get in.":"Drive safe.","alarm"]);
+  if(t.dogs) r.push([W+105,"dog","Hand off the house","Last walk and water for the dog you're sitting, then lock up."]);
+  if(work){
+    r.push([W+60,"work","Tell work when you'll get in","Send a quick message with your arrival time."],
+      [CFG.workStart,"work","Work","Arriving late today. Lunch when you can."],[CFG.workStart+150,"eat",{m:1}],[CFG.workEnd,"work","Off work, head home","Dinner starts when you're home."]);
+  } else r.push([lunch,"eat",{m:1}]);
+  r.push([1050,"dog","Feed your dog","Dinner and fresh water."],[1110,"eat",{m:2}],[1140,"house","Unpack","Dirty clothes in the hamper."],[1170,"play","Games","Nothing else needs doing tonight."],
+    [CFG.peakEnd,"house","Rinse and load the dishwasher","It only runs on dishwasher days. Wipe the counter. 5 minutes."], ...bedRows(L));
+  return r;
+}
+function mineFor(date){
+  const k = ymd(date), dow = date.getDay();
+  return ITEMS.filter(it=> it.repeat==="daily" || (it.repeat==="weekly" && (it.days||[]).includes(dow)) || (it.repeat==="once" && it.date===k))
+    .map(it=>[toMin(it.time),"mine",it.title,it.note||"",it.alert||"notify",it.id]);
+}
+function mealText(date,m,tt){
+  const kind = kindFor(date);
+  if(tt&&tt.type==="depart"&&m!==2) tt = null;
+  if(tt) return tt.type==="back"&&m===1&&kind==="work" ? "Grab something on the road or at work." : tt.type==="depart" ? "Eat before you leave." : "Whatever's on hand.";
+  if(bentoOn(date)) return ROT[weekFor(date)].days[date.getDay()][m];
+  return kind==="work"&&m===1 ? "CookUnity meal." : "CookUnity meal or whatever's on hand.";
+}
+// Everything for one date, final and sorted. Each row: {t, cat, title, text, alert, shifted, id}
+function dayItems(date){
+  const tt = tripFor(date), bento = bentoOn(date);
+  let rows = tt ? tripDay(date,tt) : baseDay(date);
+  rows = rows.filter(r=>bento||typeof r[2]!=="object"||r[2].m!==3).map(r=>{
+    if(typeof r[2]!=="object") return r;
+    const m = r[2].m; return [r[0],r[1],NAMES[m],mealText(date,m,tt)];
+  }).filter(r=>r[3]!=="—").concat(mineFor(date));
+  const late = LATE[ymd(date)];
+  return rows.map(r=>{
+    let t = r[0], shifted = false;
+    const atWork = kindFor(date)==="work" && t>=CFG.workStart && t<CFG.workEnd;
+    if(late && t>=late.from && !atWork && !["work","sleep","peak","mine"].includes(r[1]) && r[2]!=="Wind down"){ t += late.add; shifted = true; }
+    return {t,cat:r[1],title:r[2],text:r[3],alert:r[4]||"notify",shifted,id:r[5]};
+  }).sort((a,b)=>a.t-b.t);
+}
+
+/* ---------- Alerts for the Android app ---------- */
+function scheduleApp(){
   if(!window.BentoApp) return;
   const out = [], base = dayOnly(new Date());
   for(let n=0;n<45;n++){
-    const date = new Date(base); date.setDate(base.getDate()+n);
-    itemsFor(date).forEach(r=>{
-      const title = r[2], text = r[3];
-      const t = new Date(date.getFullYear(),date.getMonth(),date.getDate(),0,r[0]).getTime();
-      const alarm = (title==="Wake up"||title==="Leave for work"||title==="Wind down"||title==="Drive home"||title==="Leave for the trip") ? 1 : 0;
-      out.push({t,title,text,alarm});
-      if(title==="Wake up") [[5,"Wake up 2: stand up now"],[10,"Wake up 3: up and dressed"],[20,"Last call: out of bed"]].forEach(x=>out.push({t:t+x[0]*60000,title:x[1],text:"Feet on the floor.",alarm:1}));
+    const date = addDays(base,n);
+    dayItems(date).forEach(r=>{
+      if(r.alert==="silent") return;
+      const t = new Date(date.getFullYear(),date.getMonth(),date.getDate(),0,r.t).getTime();
+      out.push({t,title:r.title,text:r.text,alarm:r.alert==="alarm"?1:0});
+      if(r.title==="Wake up" && r.cat==="care") [[5,"Wake up 2: stand up now"],[10,"Wake up 3: up and dressed"],[20,"Last call: out of bed"]].forEach(x=>out.push({t:t+x[0]*60000,title:x[1],text:"Feet on the floor.",alarm:1}));
     });
   }
   out.sort((a,b)=>a.t-b.t);
   try{ window.BentoApp.setSchedule(JSON.stringify(out)); }catch(e){}
 }
-appSchedule();
+
+/* ---------- Navigation ---------- */
+let VIEW = "home", DAY = dayOnly(new Date()), CALM = new Date(DAY.getFullYear(),DAY.getMonth(),1), MEALW = null, PREPW = null;
+function show(view,push=true){
+  VIEW = view;
+  document.querySelectorAll(".view").forEach(v=>v.hidden = v.id!=="v-"+view);
+  render();
+  if(push){ try{ history.pushState({view,day:ymd(DAY)},""); }catch(e){} }
+  try{ localStorage.setItem("bw-view",JSON.stringify({view,day:ymd(DAY),at:Date.now()})); }catch(e){}
+  window.scrollTo(0,0);
+}
+window.addEventListener("popstate",e=>{ const s = e.state||{view:"home"}; if(s.day) DAY = parseYmd(s.day); show(s.view||"home",false); });
+document.addEventListener("click",e=>{
+  if(e.target.closest(".back")){ history.length>1 ? history.back() : show("home"); }
+});
+function toast(msg){ const t = document.createElement("div"); t.className="toast"; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),1800); }
+function afterChange(){ scheduleApp(); render(); }
+
+/* ---------- Home tiles ---------- */
+function sizeTiles(){
+  const g = document.getElementById("tiles"), cols = getComputedStyle(g).gridTemplateColumns.split(" ").length || 4;
+  const w = g.clientWidth || (Math.min(window.innerWidth,900)-32);
+  g.style.gridAutoRows = Math.floor((w-8*(cols-1))/cols)+"px";
+}
+window.addEventListener("resize",()=>{ if(VIEW==="home") sizeTiles(); });
+function nextItem(){
+  const now = new Date(), nm = now.getHours()*60+now.getMinutes();
+  for(let n=0;n<3;n++){ const d = addDays(now,n); const it = dayItems(d).find(r=>n>0||r.t>nm); if(it) return {it,d,n}; }
+  return null;
+}
+function renderHome(){
+  const now = new Date(), today = dayOnly(now), items = dayItems(today), tt = tripFor(today);
+  const doneMap = load("bw-done-"+ymd(today),{}), countable = items.filter(r=>r.cat!=="peak");
+  const done = countable.filter(r=>doneMap[r.title+"@"+r.t]).length;
+  const nx = nextItem();
+  document.getElementById("clock").innerHTML = `<b>${fmt(now.getHours()*60+now.getMinutes())}</b>${now.toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"})}`;
+  const label = tt ? (tt.type==="away"?"away: "+tt.trip.name.toLowerCase():tt.type==="depart"?"leaving today":"coming home") : KINDS[kindFor(today)].toLowerCase();
+  const dinner = items.find(r=>r.title==="Dinner");
+  const unchecked = STORES.reduce((n,s)=>n+s.items.filter((_,k)=>!CHECKS[s.id+k]).length + (SHOPX[s.id]||[]).filter(x=>!x.done).length,0);
+  const mine = ITEMS.length, mach = machineFor(today);
+  const late = LATE[ymd(today)];
+  const tiles = [
+    ["day","t42 c-cobalt",`<span class="name">today · ${esc(label)}</span>
+      <span><span class="mid">${nx?esc(nx.it.title):"Nothing left today"}</span><br><span class="small">${nx?(nx.n===0?"next at ":nx.n===1?"tomorrow at ":nice(nx.d)+" at ")+fmt(nx.it.t):""}</span></span>
+      <span class="small">${done} of ${countable.length} done</span>`],
+    ["cal","t22 c-magenta",`<span class="name">calendar</span><span class="big">${now.getDate()}</span><span class="small">${DAYNAMES[now.getDay()].toLowerCase()}</span>`],
+    ["meals","t22 c-orange",`<span class="name">meals</span><span class="small clip">tonight: ${esc(dinner?dinner.text:"—")}</span><span class="small">${bentoOn(today)?"week "+ROT[weekFor(today)].k:"bento starts "+nice(parseYmd(CFG.bentoStart)).toLowerCase()}</span>`],
+    ["late","t11 c-red",`<span class="name">late</span><span class="glyph">${late?"+"+late.add:"+15"}</span>`],
+    ["mine","t11 c-lime",`<span class="name">my items</span><span class="glyph">+</span>${mine?`<span class="count">${mine}</span>`:""}`],
+    ["shop","t22 c-teal",`<span class="name">shopping</span><span class="big">${unchecked}</span><span class="small">items left to buy</span>`],
+    ["machine","t11 c-steel",`<span class="name">${mach==="L"?"laundry":mach==="D"?"dishwasher":"machines"}</span><span class="glyph">${mach==="L"?ICON.wash:mach==="D"?ICON.dish:ICON.none}</span>`],
+    ["prep","t11 c-brown",`<span class="name">prep</span><span class="glyph">${ICON.knife}</span>`],
+    ["recipes","t11 c-purple",`<span class="name">recipes</span><span class="glyph">${ICON.onigiri}</span>`],
+    ["settings","t11 c-emerald",`<span class="name">settings</span><span class="glyph">${ICON.gear}</span>`]
+  ];
+  sizeTiles();
+  document.getElementById("tiles").innerHTML = tiles.map(([v,cls,html])=>`<button type="button" class="tile ${cls}" data-go="${v}">${html}</button>`).join("");
+}
+document.getElementById("tiles").addEventListener("click",e=>{
+  const b = e.target.closest("[data-go]"); if(!b) return;
+  const v = b.dataset.go;
+  if(v==="day"){ DAY = dayOnly(new Date()); show("day"); }
+  else if(v==="late"){ DAY = dayOnly(new Date()); LATE_OPEN = true; show("day"); }
+  else if(v==="machine"){ const m = machineFor(new Date()); toast(m==="L"?"Laundry day: one load":m==="D"?"Dishwasher runs tonight":"No machines today"); }
+  else show(v);
+});
+
+/* ---------- Day view ---------- */
+let LATE_OPEN = false;
+function renderDay(){
+  const d = DAY, today = dayOnly(new Date()), isToday = ymd(d)===ymd(today), items = dayItems(d), tt = tripFor(d);
+  const {W,ramp} = sleepFor(d), mach = machineFor(d), late = LATE[ymd(d)];
+  const lo = items.find(r=>r.title==="Lights out"), L = lo ? lo.t : sleepFor(d).L;
+  document.getElementById("day-title").textContent = isToday ? "today" : DAYNAMES[d.getDay()].toLowerCase();
+  const kind = tt ? (tt.type==="away"?"Away: "+tt.trip.name:tt.type==="depart"?"Leaving for "+tt.trip.name:"Coming home from "+tt.trip.name) : KINDS[kindFor(d)];
+  document.getElementById("day-sub").textContent = `${d.toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"})} · ${kind}`;
+  document.getElementById("day-meta").innerHTML = `<span>Up <b>${fmt(W)}</b></span><span>Lights out <b>${fmt(L)}</b>${ramp?" (bedtime ramp)":""}</span><span>Machine <b>${mach==="L"?"laundry":mach==="D"?"dishwasher":"none"}</b></span><span>Meals <b>${tt&&tt.type!=="depart"?"on the go":bentoOn(d)?"Bento week "+ROT[weekFor(d)].k:"CookUnity"}</b></span>${late?`<span>Running late <b>+${late.add} min</b></span>`:""}`;
+  document.getElementById("day-actions").innerHTML =
+    `<button class="btn" type="button" data-shift="-1">&#8592; ${nice(addDays(d,-1))}</button>`+
+    (isToday?"":`<button class="btn" type="button" data-shift="0">Today</button>`)+
+    `<button class="btn" type="button" data-shift="1">${nice(addDays(d,1))} &#8594;</button>`+
+    (isToday?`<button class="btn" type="button" id="late-open">Running late</button>`:"")+
+    `<button class="btn" type="button" id="day-add">+ Add item</button>`;
+  document.getElementById("late-sheet").innerHTML = isToday && LATE_OPEN ? `<div class="sheet"><b>Push the rest of today back</b>
+    <p class="note">Moves every step from now on, except work hours, peak hours and bedtime.</p>
+    <div class="row-btns">${[15,30,60].map(n=>`<button class="btn solid" type="button" data-late="${n}">+${n} min</button>`).join("")}${late?`<button class="btn warn" type="button" data-late="0">Back on time</button>`:""}</div></div>` : "";
+  const nm = new Date().getHours()*60+new Date().getMinutes();
+  let nowIdx = -1; if(isToday) items.forEach((r,k)=>{ if(r.t<=nm) nowIdx = k; });
+  const doneMap = load("bw-done-"+ymd(d),{});
+  document.getElementById("day-rows").innerHTML = items.map((r,k)=>{
+    const body = `<span class="t">${fmt(r.t)}</span><span class="b"><span class="tag">${r.cat==="mine"?"my item":r.alert==="alarm"?"alarm":""}</span><b>${esc(r.title)}</b><span class="d">${esc(r.text)}</span></span>`;
+    const cls = `row k-${r.cat}${k===nowIdx?" is-now":""}${r.shifted?" shifted":""}`;
+    if(r.cat==="peak") return `<div class="${cls}">${body}</div>`;
+    const key = r.title+"@"+r.t;
+    return isToday ? `<label class="${cls}">${body}<input type="checkbox" data-done="${esc(key)}"${doneMap[key]?" checked":""} aria-label="Done: ${esc(r.title)}"></label>` : `<div class="${cls}">${body}</div>`;
+  }).join("") || `<div class="empty">Nothing planned.</div>`;
+}
+document.getElementById("v-day").addEventListener("click",e=>{
+  const s = e.target.closest("[data-shift]");
+  if(s){ const n = +s.dataset.shift; DAY = n===0 ? dayOnly(new Date()) : addDays(DAY,n); LATE_OPEN=false; render(); return; }
+  if(e.target.closest("#late-open")){ LATE_OPEN = !LATE_OPEN; render(); return; }
+  const l = e.target.closest("[data-late]");
+  if(l){ const n = +l.dataset.late, k = ymd(dayOnly(new Date())), nm = new Date().getHours()*60+new Date().getMinutes();
+    if(n===0) delete LATE[k]; else LATE[k] = {from: LATE[k]?LATE[k].from:nm, add: n};
+    store("bw-late",LATE); LATE_OPEN=false; afterChange(); toast(n?`Rest of today pushed back ${n} minutes`:"Back on the normal times"); return; }
+  if(e.target.closest("#day-add")){ startItem({date:ymd(DAY)}); show("mine"); }
+});
+document.getElementById("v-day").addEventListener("change",e=>{
+  const k = e.target.dataset.done; if(k===undefined) return;
+  const key = "bw-done-"+ymd(DAY), m = load(key,{}); m[k] = e.target.checked; store(key,m);
+});
+
+/* ---------- Calendar ---------- */
+function renderCal(){
+  const y = CALM.getFullYear(), mo = CALM.getMonth(), first = new Date(y,mo,1), start = addDays(first,-first.getDay()), today = ymd(dayOnly(new Date()));
+  document.getElementById("cal-month").textContent = first.toLocaleDateString("en-US",{month:"long",year:"numeric"}).toLowerCase();
+  let html = ["S","M","T","W","T","F","S"].map(x=>`<div class="dow">${x}</div>`).join("");
+  for(let n=0;n<42;n++){
+    const d = addDays(start,n), tt = tripFor(d), k = kindFor(d), m = machineFor(d), dots = [];
+    if(tt) dots.push("--amber");
+    else { if(k==="work") dots.push("--cobalt"); if(k==="game") dots.push("--purple"); if(k==="prep"&&bentoOn(d)) dots.push("--orange"); }
+    if(m==="L") dots.push("--teal"); if(m==="D") dots.push("--steel");
+    if(mineFor(d).length) dots.push("--lime");
+    html += `<button type="button" class="cell${d.getMonth()!==mo?" out":""}${ymd(d)===today?" today":""}" data-day="${ymd(d)}" aria-label="${nice(d)}"><span class="n">${d.getDate()}</span><span class="dots">${dots.map(c=>`<i class="dot" style="background:var(${c})"></i>`).join("")}</span></button>`;
+  }
+  document.getElementById("cal").innerHTML = html;
+}
+document.getElementById("cal").addEventListener("click",e=>{ const c = e.target.closest("[data-day]"); if(!c) return; DAY = parseYmd(c.dataset.day); LATE_OPEN=false; show("day"); });
+document.getElementById("cal-prev").addEventListener("click",()=>{ CALM = new Date(CALM.getFullYear(),CALM.getMonth()-1,1); render(); });
+document.getElementById("cal-next").addEventListener("click",()=>{ CALM = new Date(CALM.getFullYear(),CALM.getMonth()+1,1); render(); });
+
+/* ---------- Meals and prep ---------- */
+function weekPills(id,sel,cur){
+  document.getElementById(id).innerHTML = ROT.map((w,i)=>`<button type="button" class="pill${i===cur?" now":""}" data-w="${i}" aria-pressed="${i===sel}">${w.k}</button>`).join("");
+}
+function curWeek(){ const t = dayOnly(new Date()); return bentoOn(t) ? weekFor(t) : -1; }
+function renderMeals(){
+  const cur = curWeek(); if(MEALW===null) MEALW = Math.max(cur,0);
+  weekPills("meal-weeks",MEALW,cur);
+  const w = ROT[MEALW];
+  document.getElementById("meals-sub").textContent = `Week ${w.k}: ${w.name}. ${cur<0?"Cooking starts "+nice(parseYmd(CFG.bentoStart))+" with Week A.":cur===MEALW?"This is this week.":""}`;
+  document.getElementById("meal-days").innerHTML = [1,2,3,4,5,6,0].map(i=>`<div class="meal-day"><h4>${DAYNAMES[i]} <small>· ${KINDS[CFG.days[i]]||""}</small></h4>${w.days[i].map((f,m)=>f==="—"?"":`<div><small>${NAMES[m]}:</small> ${esc(f)}</div>`).join("")}</div>`).join("");
+}
+document.getElementById("meal-weeks").addEventListener("click",e=>{ const b = e.target.closest("[data-w]"); if(b){ MEALW = +b.dataset.w; render(); } });
+function renderPrep(){
+  const cur = curWeek(); if(PREPW===null) PREPW = Math.max(cur,0);
+  weekPills("prep-weeks",PREPW,cur);
+  const w = ROT[PREPW], mon = (()=>{ let d = dayOnly(new Date()); while(d.getDay()!==1) d = addDays(d,1); return d<parseYmd(CFG.bentoStart)?parseYmd(CFG.bentoStart):d; })();
+  const start = Math.max(720,sleepFor(mon).W+240)+30;
+  const shift = t=>{ const [h,m] = t.split(":").map(Number); return fmt(h*60+m-240+start); };
+  document.getElementById("prep-sub").textContent = `Week ${w.k}: ${w.name}. Monday, ${fmt(start)}–${fmt(start+75)}, done before peak hours.`;
+  const steps = [["4:00","Boil 6 eggs","6½ minutes, ice bath, peel, into the marinade. Ready by Tuesday morning."], ...w.prep,
+    ["4:55","Shape 6 onigiri",`Microwave 3 rice bowls, cool 2 minutes, press 2 per bowl in your kit's triangle molds. ${w.onigiri[0].toUpperCase()+w.onigiri.slice(1)} filling.`],
+    ["5:05","Portion into prep containers","Proteins and sides into small containers. Each workday morning, fill your bento from them."]];
+  document.getElementById("prep-steps").innerHTML = steps.map(s=>`<li><span class="t">${shift(s[0])}</span><span><b>${esc(s[1])}</b><br><span style="color:var(--dim)">${esc(s[2])}</span></span></li>`).join("");
+}
+document.getElementById("prep-weeks").addEventListener("click",e=>{ const b = e.target.closest("[data-w]"); if(b){ PREPW = +b.dataset.w; render(); } });
+function renderRecipes(){
+  document.getElementById("recipe-list").innerHTML = RECIPES.map(r=>`<div class="card"><h4>${esc(r.n)}</h4><div class="jp">${esc(r.jp)}</div><ul>${r.ing.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>${r.how?`<p>${esc(r.how)}</p>`:""}<div class="uses">Used for: ${esc(r.uses)}</div></div>`).join("");
+}
+
+/* ---------- Shopping ---------- */
+function renderShop(){
+  document.getElementById("stores").innerHTML = STORES.map(s=>{
+    const extra = SHOPX[s.id]||[];
+    const left = s.items.filter((_,k)=>!CHECKS[s.id+k]).length + extra.filter(x=>!x.done).length;
+    return `<div class="store-head"><h3>${esc(s.n)}</h3><small>${left} left · ${esc(s.when)}</small></div>`+
+      s.items.map((it,k)=>`<label class="check"><input type="checkbox" data-c="${s.id+k}"${CHECKS[s.id+k]?" checked":""}><span>${esc(it[0])}${it[1]?`<small>${esc(it[1])}</small>`:""}</span></label>`).join("")+
+      extra.map(x=>`<label class="check"><input type="checkbox" data-x="${s.id}|${x.id}"${x.done?" checked":""}><span>${esc(x.t)}<small>Added by you</small></span><button class="x" type="button" data-xdel="${s.id}|${x.id}" aria-label="Remove ${esc(x.t)}">&#215;</button></label>`).join("")+
+      `<form class="inline-add" data-add="${s.id}"><input type="text" placeholder="Add an item" aria-label="Add an item to ${esc(s.n)}"><button class="btn" type="submit">Add</button></form>`;
+  }).join("");
+}
+const vshop = document.getElementById("v-shop");
+vshop.addEventListener("change",e=>{
+  const c = e.target.dataset.c, x = e.target.dataset.x;
+  if(c!==undefined){ CHECKS[c] = e.target.checked; store("bento-checks",CHECKS); }
+  if(x!==undefined){ const [sid,id] = x.split("|"); const it = (SHOPX[sid]||[]).find(i=>i.id===id); if(it){ it.done = e.target.checked; store("bw-shop-extra",SHOPX); } }
+});
+vshop.addEventListener("click",e=>{
+  const d = e.target.closest("[data-xdel]"); if(!d) return; e.preventDefault();
+  const [sid,id] = d.dataset.xdel.split("|"); SHOPX[sid] = (SHOPX[sid]||[]).filter(i=>i.id!==id); store("bw-shop-extra",SHOPX); render();
+});
+vshop.addEventListener("submit",e=>{
+  const f = e.target.closest("[data-add]"); if(!f) return; e.preventDefault();
+  const v = f.querySelector("input").value.trim(); if(!v) return;
+  (SHOPX[f.dataset.add] = SHOPX[f.dataset.add]||[]).push({id:uid(),t:v,done:false}); store("bw-shop-extra",SHOPX); render();
+});
+document.getElementById("shop-reset").addEventListener("click",()=>{ CHECKS = {}; store("bento-checks",CHECKS); Object.values(SHOPX).forEach(a=>a.forEach(x=>x.done=false)); store("bw-shop-extra",SHOPX); render(); toast("Checkmarks cleared"); });
+
+/* ---------- My items ---------- */
+const $ = id=>document.getElementById(id);
+$("mf-days").innerHTML = DAYNAMES.map((n,i)=>`<label><input type="checkbox" value="${i}"> ${n.slice(0,3)}</label>`).join("");
+function syncRepeat(){ const r = $("mf-repeat").value; $("mf-date-wrap").hidden = r!=="once"; $("mf-days-wrap").hidden = r!=="weekly"; }
+$("mf-repeat").addEventListener("change",syncRepeat);
+function startItem(it){
+  $("mf-id").value = it.id||""; $("mf-title").value = it.title||""; $("mf-note").value = it.note||"";
+  $("mf-time").value = it.time||"09:00"; $("mf-repeat").value = it.repeat||"once"; $("mf-date").value = it.date||ymd(DAY);
+  $("mf-days").querySelectorAll("input").forEach(c=>c.checked=(it.days||[]).includes(+c.value));
+  document.querySelectorAll('input[name="mf-alert"]').forEach(r=>r.checked = r.value===(it.alert||"notify"));
+  $("mf-save").textContent = it.id ? "Save changes" : "Add item"; $("mf-cancel").hidden = !it.id; syncRepeat();
+}
+$("mine-form").addEventListener("submit",e=>{
+  e.preventDefault();
+  const id = $("mf-id").value || uid(), repeat = $("mf-repeat").value;
+  const it = {id,title:$("mf-title").value.trim(),note:$("mf-note").value.trim(),time:$("mf-time").value||"09:00",repeat,
+    date:repeat==="once"?($("mf-date").value||ymd(new Date())):undefined,
+    days:repeat==="weekly"?[...$("mf-days").querySelectorAll("input:checked")].map(c=>+c.value):undefined,
+    alert:(document.querySelector('input[name="mf-alert"]:checked')||{}).value||"notify"};
+  if(!it.title) return;
+  if(repeat==="weekly"&&!it.days.length){ toast("Pick at least one day"); return; }
+  const i = ITEMS.findIndex(x=>x.id===id); if(i>=0) ITEMS[i] = it; else ITEMS.push(it);
+  saveItems(); startItem({}); toast(i>=0?"Item saved":"Item added");
+});
+$("mf-cancel").addEventListener("click",()=>startItem({}));
+function describeItem(it){
+  const when = it.repeat==="daily" ? "Every day" : it.repeat==="weekly" ? "Every "+(it.days||[]).map(d=>DAYNAMES[d].slice(0,3)).join(", ") : nice(parseYmd(it.date));
+  return `${when} at ${fmt(toMin(it.time))} · ${it.alert==="alarm"?"rings":it.alert==="silent"?"no alert":"notifies"}`;
+}
+function renderMine(){
+  const list = [...ITEMS].sort((a,b)=>(a.repeat==="once"?a.date:"0")+a.time < (b.repeat==="once"?b.date:"0")+b.time ? -1 : 1);
+  $("mine-list").innerHTML = list.length ? list.map(it=>`<div class="item"><div class="b"><b>${esc(it.title)}</b><small>${esc(describeItem(it))}</small>${it.note?`<small>${esc(it.note)}</small>`:""}</div>
+    <button class="btn" type="button" data-edit="${it.id}">Edit</button><button class="btn warn" type="button" data-del="${it.id}">Delete</button></div>`).join("")
+    : `<div class="empty">No items yet. Add appointments, onsites, or anything else you want reminding about.</div>`;
+}
+$("mine-list").addEventListener("click",e=>{
+  const ed = e.target.closest("[data-edit]"), de = e.target.closest("[data-del]");
+  if(ed){ startItem(ITEMS.find(x=>x.id===ed.dataset.edit)); window.scrollTo(0,0); }
+  if(de){ const b = de; if(b.dataset.sure){ ITEMS = ITEMS.filter(x=>x.id!==b.dataset.del); saveItems(); toast("Item deleted"); } else { b.dataset.sure = "1"; b.textContent = "Tap to confirm"; } }
+});
+
+/* ---------- Settings ---------- */
+const DAYKINDS = [["work","Work day"],["game","Game day"],["house","House day"],["reset","Reset day"],["prep","Prep day"],["off","Day off"]];
+function renderSettings(){
+  $("s-wake").value = toHHMM(CFG.wake); $("s-bed").value = toHHMM(CFG.bed%1440);
+  $("s-ws").value = toHHMM(CFG.workStart); $("s-we").value = toHHMM(CFG.workEnd); $("s-drive").value = CFG.drive;
+  $("s-ps").value = toHHMM(CFG.peakStart); $("s-pe").value = toHHMM(CFG.peakEnd);
+  $("s-mach").value = CFG.machineStart; $("s-bento").value = CFG.bentoStart; $("s-dog").checked = !!CFG.dogsAtHome;
+  const today = dayOnly(new Date()), s = sleepFor(today);
+  $("s-ramp").textContent = s.ramp ? `The bedtime ramp is still stepping down (today: up ${fmt(s.W)}, lights out ${fmt(s.L)}). From Oct 13 these times take over.` : "";
+  $("s-days").innerHTML = [1,2,3,4,5,6,0].map(i=>`<label>${DAYNAMES[i]}<select data-dow="${i}">${DAYKINDS.map(([v,n])=>`<option value="${v}"${CFG.days[i]===v?" selected":""}>${n}</option>`).join("")}</select></label>`).join("");
+  $("trip-list").innerHTML = CFG.trips.length ? CFG.trips.map(t=>`<div class="trip"><b>${esc(t.name)}</b><div class="note">Leave ${nice(parseYmd(t.leave))} at ${fmt(t.leaveTime)} · home ${nice(parseYmd(t.back))}${t.dogs?" · dog reminders":""}</div>
+    <div class="actions" style="margin:6px 0 0"><button class="btn" type="button" data-tedit="${t.id}">Edit</button><button class="btn warn" type="button" data-tdel="${t.id}">Delete</button></div></div>`).join("") : `<div class="empty">No trips planned.</div>`;
+  if(document.activeElement!==$("io")) $("io").value = "";
+}
+$("set-form").addEventListener("change",e=>{
+  const el = e.target;
+  if(el.dataset.dow!==undefined){ CFG.days[+el.dataset.dow] = el.value; }
+  else switch(el.id){
+    case "s-wake": CFG.wake = toMin(el.value); break;
+    case "s-bed": { const b = toMin(el.value); CFG.bed = b<=360 ? b+1440 : b; break; }
+    case "s-ws": CFG.workStart = toMin(el.value); break;
+    case "s-we": CFG.workEnd = toMin(el.value); break;
+    case "s-drive": CFG.drive = Math.max(0,Math.min(180,+el.value||0)); break;
+    case "s-ps": CFG.peakStart = toMin(el.value); break;
+    case "s-pe": CFG.peakEnd = toMin(el.value); break;
+    case "s-mach": if(el.value) CFG.machineStart = el.value; break;
+    case "s-bento": if(el.value) CFG.bentoStart = el.value; break;
+    case "s-dog": CFG.dogsAtHome = el.checked; break;
+  }
+  saveCfg(); toast("Saved");
+});
+function startTrip(t){
+  $("tf-id").value = t.id||""; $("tf-name").value = t.name||""; $("tf-leave").value = t.leave||""; $("tf-ltime").value = t.leaveTime!=null?toHHMM(t.leaveTime):"20:30";
+  $("tf-back").value = t.back||""; $("tf-dogs").checked = t.dogs!==false; $("tf-save").textContent = t.id?"Save trip":"Add trip"; $("tf-cancel").hidden = !t.id;
+}
+$("trip-form").addEventListener("submit",e=>{
+  e.preventDefault();
+  const t = {id:$("tf-id").value||uid(),name:$("tf-name").value.trim()||"Trip",leave:$("tf-leave").value,leaveTime:toMin($("tf-ltime").value),back:$("tf-back").value,dogs:$("tf-dogs").checked};
+  if(!t.leave||!t.back||t.back<=t.leave){ toast("Home date has to be after the leaving date"); return; }
+  const i = CFG.trips.findIndex(x=>x.id===t.id); if(i>=0) CFG.trips[i] = t; else CFG.trips.push(t);
+  CFG.trips.sort((a,b)=>a.leave<b.leave?-1:1); saveCfg(); startTrip({}); toast("Trip saved");
+});
+$("tf-cancel").addEventListener("click",()=>startTrip({}));
+$("trip-list").addEventListener("click",e=>{
+  const ed = e.target.closest("[data-tedit]"), de = e.target.closest("[data-tdel]");
+  if(ed) startTrip(CFG.trips.find(x=>x.id===ed.dataset.tedit));
+  if(de){ if(de.dataset.sure){ CFG.trips = CFG.trips.filter(x=>x.id!==de.dataset.tdel); saveCfg(); toast("Trip deleted"); } else { de.dataset.sure="1"; de.textContent="Tap to confirm"; } }
+});
+$("io-copy").addEventListener("click",()=>{
+  const text = JSON.stringify({v:1,settings:CFG,items:ITEMS,shopExtra:SHOPX});
+  $("io").value = text; $("io").focus(); $("io").select();
+  const done = ()=>toast("Copied. Paste it on the other device.");
+  try{ navigator.clipboard.writeText(text).then(done,()=>toast("Selected. Use your phone's Copy.")); }catch(e){ toast("Selected. Use your phone's Copy."); }
+});
+$("io-load").addEventListener("click",()=>{
+  try{ const o = JSON.parse($("io").value); if(!o||!o.settings) throw 0;
+    CFG = Object.assign({},DEFAULTS,o.settings); ITEMS = o.items||[]; SHOPX = o.shopExtra||{};
+    store("bw-settings",CFG); store("bw-items",ITEMS); store("bw-shop-extra",SHOPX); $("io").value=""; afterChange(); toast("Setup loaded");
+  }catch(e){ toast("That text isn't a Bento Week setup. Copy it again."); }
+});
+$("io-reset").addEventListener("click",e=>{
+  const b = e.target; if(!b.dataset.sure){ b.dataset.sure="1"; b.textContent="Tap again to reset"; return; }
+  CFG = JSON.parse(JSON.stringify(DEFAULTS)); store("bw-settings",CFG); b.dataset.sure=""; b.textContent="Reset settings"; afterChange(); toast("Settings reset");
+});
+
+/* ---------- Render loop ---------- */
+function render(){
+  ({home:renderHome,day:renderDay,cal:renderCal,meals:renderMeals,prep:renderPrep,recipes:renderRecipes,shop:renderShop,mine:renderMine,settings:renderSettings}[VIEW]||renderHome)();
+}
+(function boot(){
+  startItem({}); startTrip({});
+  const last = load("bw-view",null);
+  if(last && Date.now()-last.at < 15*60*1000 && last.view && last.view!=="home"){ if(last.day) DAY = parseYmd(last.day); try{ history.replaceState({view:"home"},""); }catch(e){} show(last.view); }
+  else { try{ history.replaceState({view:"home"},""); }catch(e){} show("home",false); }
+  scheduleApp();
+  setInterval(()=>{ if(VIEW==="home"||VIEW==="day") render(); },30000);
+})();
 </script>
 
 </body>
