@@ -51,8 +51,9 @@ button,input,select,textarea{font:inherit;color:inherit}
 .face .cap{position:absolute;left:10px;right:10px;bottom:26px;z-index:1;font-size:14px;line-height:1.25;text-shadow:0 1px 3px rgba(0,0,0,.6)}
 .tile .label{position:absolute;left:8px;bottom:5px;font-size:13px;z-index:2;text-transform:lowercase;text-shadow:0 1px 2px rgba(0,0,0,.35)}
 .tile .badge{position:absolute;right:8px;bottom:3px;font-size:17px;z-index:2;font-variant-numeric:tabular-nums}
-.t11 .face{padding:0;align-items:center;justify-content:center}
-.t11 .face svg{width:46%;height:46%}
+.t11 .face{padding:0 0 18px;align-items:center;justify-content:center}
+.t11 .face svg{width:40%;height:40%}
+.t11 .label{font-size:12px;left:6px;right:4px;bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .icon-c{flex:1;display:flex;align-items:center;justify-content:center}
 .icon-c svg{width:56px;height:56px}
 .big{font-size:54px;font-weight:300;line-height:1}
@@ -732,7 +733,7 @@ function pickPicture(target){ PICK = target; const p = $("picker"); p.value = ""
 
 /* ---------- Navigation ---------- */
 const $ = id=>document.getElementById(id);
-const GROUPS = {plan:[["day","today"],["cal","calendar"],["mine","my items"]],food:[["meals","meals"],["prep","prep"],["recipes","recipes"],["shop","shopping"]],settings:[["settings","settings"],["look","look"]]};
+const GROUPS = {plan:[["day","today"],["cal","calendar"],["mine","my items"]],food:[["meals","meals"],["prep","prep"],["recipes","recipes"],["shop","shopping"]],settings:[["settings","settings"],["look","colors & pictures"]]};
 let VIEW = "home", DAY = dayOnly(new Date()), CALM = new Date(DAY.getFullYear(),DAY.getMonth(),1), MEALW = null, PREPW = null, LATE_OPEN = false;
 function groupOf(v){ return Object.keys(GROUPS).find(g=>GROUPS[g].some(x=>x[0]===v)); }
 function show(view,push=true,animate=true){
@@ -844,21 +845,21 @@ function renderHome(){
   { const p = getPic("meals"); const f = [p?picFace(p,dinner?"tonight: "+dinner.text:""):artFace("bento",""),face(`<div class="lead">tonight</div><div class="mid clip3" style="font-size:18px;margin-top:4px">${esc(dinner?dinner.text:"—")}</div><div style="flex:1"></div><div class="small">${bentoOn(today)?"week "+ROT[weekFor(today)].k:"bento starts "+nice(parseYmd(CFG.bentoStart)).toLowerCase()}</div>`)];
     T.push({k:"meals",go:"meals",cls:"t22",faces:f,label:"meals"}); }
   // small tiles row
-  T.push({k:"late",go:"late",cls:"t11",faces:[face(ICON.clock)],badge:late?"+"+late.add:""});
-  T.push({k:"mine",go:"mine",cls:"t11",faces:[face(ICON.plus)],badge:ITEMS.length||""});
-  T.push({k:"machine",go:"machine",cls:"t11",faces:[face(mach==="L"?ICON.wash:mach==="D"?ICON.dish:ICON.none)]});
-  T.push({k:"prep",go:"prep",cls:"t11",faces:[face(ICON.knife)]});
+  T.push({k:"late",go:"late",cls:"t11",faces:[face(ICON.clock)],label:late?"late +"+late.add:"running late"});
+  T.push({k:"mine",go:"mine",cls:"t11",faces:[face(ICON.plus)],label:ITEMS.length?"my items ("+ITEMS.length+")":"my items"});
+  T.push({k:"machine",go:"machine",cls:"t11",faces:[face(mach==="L"?ICON.wash:mach==="D"?ICON.dish:ICON.none)],label:mach==="L"?"laundry today":mach==="D"?"dishwasher":"no machines"});
+  T.push({k:"prep",go:"prep",cls:"t11",faces:[face(ICON.knife)],label:"meal prep"});
   // shopping
   { const p = getPic("shop"); const f = [face(`<div class="icon-c">${ICON.cart}</div>`),face(`<div class="lead">to buy</div><div class="list3" style="margin-top:4px">${unchecked.slice(0,4).map(x=>`<div>${esc(x)}</div>`).join("")||"<div>Nothing left</div>"}</div>`),p?picFace(p):artFace("bag")];
     T.push({k:"shop",go:"shop",cls:"t22",faces:f,label:"shopping",badge:unchecked.length}); }
   // photos
   T.push({k:"photos",go:"photos",cls:"t22",faces:[photoSrc?picFace(photoSrc):artFace("photos","add your photos")],label:"photos"});
-  if(tt && tt.trip.dogs) T.push({k:"dogs",go:"day",cls:"t11",faces:[face(ICON.dog)]});
-  T.push({k:"recipes",go:"recipes",cls:"t11",faces:[face(ICON.onigiri)]});
-  T.push({k:"settings",go:"settings",cls:"t11",faces:[face(ICON.gear)]});
-  T.push({k:"look",go:"look",cls:"t11",faces:[face(ICON.palette)]});
+  if(tt && tt.trip.dogs) T.push({k:"dogs",go:"day",cls:"t11",faces:[face(ICON.dog)],label:"dogs"});
+  T.push({k:"recipes",go:"recipes",cls:"t11",faces:[face(ICON.onigiri)],label:"recipes"});
+  T.push({k:"settings",go:"settings",cls:"t11",faces:[face(ICON.gear)],label:"settings"});
+  T.push({k:"look",go:"look",cls:"t11",faces:[face(ICON.palette)],label:"colors & pics"});
   const bg = getPic("startbg");
-  $("tiles").innerHTML = T.map(t=>`<button type="button" class="tile ${t.cls}${bg?" bgwin":""}" data-go="${t.go}" data-k="${t.k}" data-faces="${t.faces.length}" data-face="0" style="${!bg&&tileColor(t.k)?"background:"+tileColor(t.k):""}${bg?`;background-image:url('${bg}')`:""}" aria-label="${t.label||t.k}">${t.faces.join("")}${t.label&&t.cls!=="t11"?`<span class="label">${t.label}</span>`:""}${t.badge!==undefined&&t.badge!==""?`<span class="badge">${t.badge}</span>`:""}</button>`).join("");
+  $("tiles").innerHTML = T.map(t=>`<button type="button" class="tile ${t.cls}${bg?" bgwin":""}" data-go="${t.go}" data-k="${t.k}" data-faces="${t.faces.length}" data-face="0" style="${!bg&&tileColor(t.k)?"background:"+tileColor(t.k):""}${bg?`;background-image:url('${bg}')`:""}" aria-label="${t.label||t.k}">${t.faces.join("")}${t.label?`<span class="label">${esc(t.label)}</span>`:""}${t.badge!==undefined&&t.badge!==""?`<span class="badge">${t.badge}</span>`:""}</button>`).join("");
   $("to-apps").innerHTML = I('<path d="M12 5v14M6 13l6 6 6-6"/>');
   sizeTiles();
 }
@@ -892,7 +893,7 @@ $("tiles").addEventListener("click",e=>{
 $("to-apps").addEventListener("click",()=>show("apps"));
 
 /* ---------- All sections ---------- */
-const APPS = [["cal","calendar","cal"],["look","look","palette"],["meals","meals","bowl"],["mine","my items","plus"],["photos","photos","photo"],["prep","prep","knife"],["recipes","recipes","onigiri"],["settings","settings","gear"],["shop","shopping","cart"],["day","today","today"]];
+const APPS = [["cal","calendar","cal"],["look","colors & pictures","palette"],["meals","meals","bowl"],["mine","my items","plus"],["photos","photos","photo"],["prep","prep","knife"],["recipes","recipes","onigiri"],["settings","settings","gear"],["shop","shopping","cart"],["day","today","today"]];
 function renderApps(){ $("applist").innerHTML = APPS.map(([v,n,ic])=>`<button type="button" data-app="${v}"><span class="sq">${ICON[ic]}</span>${n}</button>`).join(""); }
 $("applist").addEventListener("click",e=>{ const b = e.target.closest("[data-app]"); if(!b) return; if(b.dataset.app==="day") DAY = dayOnly(new Date()); show(b.dataset.app); });
 
