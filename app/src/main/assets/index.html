@@ -333,7 +333,8 @@ const MACH_START = Date.UTC(2026,9,5); // Mon Oct 5, 2026 = laundry day
 // the cycle restarts with laundry on Wed Oct 14, the first day back.
 const AWAY_FROM = Date.UTC(2026,9,9), AWAY_TO = Date.UTC(2026,9,13), MACH_RESTART = Date.UTC(2026,9,14);
 const utcDay = d=>Date.UTC(d.getFullYear(),d.getMonth(),d.getDate());
-const tripFor = d=>{ const u = utcDay(d); return u>=AWAY_FROM&&u<AWAY_TO ? "away" : u===AWAY_TO ? "travel" : null; };
+const DEPART = Date.UTC(2026,9,8); // Thu Oct 8: work, home to pack, leave in the evening
+const tripFor = d=>{ const u = utcDay(d); return u===DEPART ? "depart" : u>=AWAY_FROM&&u<AWAY_TO ? "away" : u===AWAY_TO ? "travel" : null; };
 const machineFor = d=>{ const u = utcDay(d); if(u>=AWAY_FROM&&u<=AWAY_TO) return null;
   const n = Math.round((u-(u>=MACH_RESTART?MACH_RESTART:MACH_START))/864e5), m = ((n%4)+4)%4; return m===0?"L":m===2?"D":null; };
 function buildTrip(W,L,trip){
@@ -374,11 +375,20 @@ function itemsFor(date){
   const i = date.getDay(), kind = KIND[i], st = stageFor(date), W = WAKES[st], L = BEDS[st];
   const w = ROT[weekFor(date)], bento = date>=ANCHOR, trip = tripFor(date);
   const yest = new Date(date); yest.setDate(yest.getDate()-1);
-  const rows = trip ? buildTrip(W,L,trip) : build(i,W,L,bento,machineFor(date),machineFor(yest)==="D");
+  const rows = trip==="depart" ? build(i,W,L,bento,machineFor(date),machineFor(yest)==="D").filter(r=>r[0]<1020).concat([
+      [1020,"work","Off work, head home","If the onsite runs long, everything below just slides later."],
+      [1050,"house","Pack","Clothes for 5 days, chargers, the laptop, and your dog's food, bowls and leash."],
+      [1110,"eat",{m:2}],
+      [1170,"house","Load the car","Bags, dog stuff, laptop. Check the stove and lights, then lock up."],
+      [1230,"care","Leave for the trip","About 2 to 2½ hours. Take your dog out right before you go."],
+      [1380,"house","Arrive and settle the dogs","Water, a quick walk, and show them where to sleep."],
+      [1425,"sleep","In bed, YouTube on","Queue a long SCP or gaming video. Brightness down, screen turned away, autoplay off or a sleep timer set so it stops by itself."],
+      [1455,"sleep","Lights out","Late night tonight. Tomorrow starts at the normal time."]])
+    : trip ? buildTrip(W,L,trip) : build(i,W,L,bento,machineFor(date),machineFor(yest)==="D");
   return rows.filter(r=>bento||typeof r[2]!=="object"||r[2].m!==3).map(r=>{
     if(typeof r[2]!=="object") return r;
     const m = r[2].m;
-    const text = trip ? (trip==="travel"&&m===1 ? "Grab something on the road or at work." : "Whatever's on hand.")
+    const text = trip==="depart" ? (m===1 ? "CookUnity meal." : m===2 ? "Eat before you leave." : "CookUnity meal or whatever's on hand.") : trip ? (trip==="travel"&&m===1 ? "Grab something on the road or at work." : "Whatever's on hand.")
       : bento ? w.days[i][m] : (kind==="work"&&m===1 ? "CookUnity meal." : "CookUnity meal or whatever's on hand.");
     return [r[0],r[1],NAMES[m],text];
   }).filter(r=>r[3]!=="—");
@@ -404,9 +414,9 @@ function renderToday(){
   const bento = date>=ANCHOR;
   const mach = machineFor(date), yest = new Date(date); yest.setDate(yest.getDate()-1);
   const items = itemsFor(date), trip = tripFor(date);
-  const label = trip==="away" ? "Away: dog sitting" : trip==="travel" ? "Travel day" : !bento&&kind==="prep" ? "Day off" : KIND_LABEL[kind];
-  const pillCls = trip==="travel" ? "work" : trip ? "off" : !bento&&kind==="prep" ? "off" : KIND_PILL[kind];
-  const blurb = trip==="away" ? "No chores and no machines. Look after the dogs, eat, game, and keep the sleep times." : trip==="travel" ? "Drive home and head to work, arriving late. Unpack tonight; laundry runs tomorrow." : !bento&&kind==="prep" ? "A quick tidy. Shopping and meal prep start Monday, Oct 19." : KIND_BLURB[kind];
+  const label = trip==="depart" ? "Work, then the trip" : trip==="away" ? "Away: dog sitting" : trip==="travel" ? "Travel day" : !bento&&kind==="prep" ? "Day off" : KIND_LABEL[kind];
+  const pillCls = trip==="travel"||trip==="depart" ? "work" : trip ? "off" : !bento&&kind==="prep" ? "off" : KIND_PILL[kind];
+  const blurb = trip==="depart" ? "Work as normal, then home to pack and on the road around 8:30 PM. No machines tonight." : trip==="away" ? "No chores and no machines. Look after the dogs, eat, game, and keep the sleep times." : trip==="travel" ? "Drive home and head to work, arriving late. Unpack tonight; laundry runs tomorrow." : !bento&&kind==="prep" ? "A quick tidy. Shopping and meal prep start Monday, Oct 19." : KIND_BLURB[kind];
   let nowIdx = -1; if(isToday) items.forEach((r,k)=>{ if(r[0]<=nowMin) nowIdx = k; });
   const total = items.filter(r=>r[1]!=="peak").length, done = items.filter((r,k)=>r[1]!=="peak"&&dayDone[k]).length;
   const rows = items.map((r,k)=>{
@@ -563,7 +573,7 @@ function appSchedule(){
     itemsFor(date).forEach(r=>{
       const title = r[2], text = r[3];
       const t = new Date(date.getFullYear(),date.getMonth(),date.getDate(),0,r[0]).getTime();
-      const alarm = (title==="Wake up"||title==="Leave for work"||title==="Wind down"||title==="Drive home") ? 1 : 0;
+      const alarm = (title==="Wake up"||title==="Leave for work"||title==="Wind down"||title==="Drive home"||title==="Leave for the trip") ? 1 : 0;
       out.push({t,title,text,alarm});
       if(title==="Wake up") [[5,"Wake up 2: stand up now"],[10,"Wake up 3: up and dressed"],[20,"Last call: out of bed"]].forEach(x=>out.push({t:t+x[0]*60000,title:x[1],text:"Feet on the floor.",alarm:1}));
     });
